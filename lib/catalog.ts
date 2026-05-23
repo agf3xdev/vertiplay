@@ -37,11 +37,21 @@ const sampleVideos = [
   "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
 ];
 
-const poster = (q: string) =>
-  `https://images.unsplash.com/${q}?auto=format&fit=crop&w=900&q=80`;
+// Posters agora vêm do gerador SVG local (/api/poster/[id]).
+// Independente de fontes externas, sempre carrega, sempre on-brand.
+const POSTER_OF = (seriesId: string) => `/api/poster/${seriesId}`;
 
-const banner = (q: string) =>
-  `https://images.unsplash.com/${q}?auto=format&fit=crop&w=1600&q=80`;
+const poster = (_q: string) => ""; // mantido só pra compat — overrided abaixo por id
+const banner = (_q: string) => "";
+
+// Fill helper — qualquer poster vazio é substituído pelo gerador local
+function fillPosters() {
+  SERIES.forEach((s) => {
+    s.posterUrl = POSTER_OF(s.id);
+    s.bannerUrl = POSTER_OF(s.id);
+    s.episodes.forEach((ep) => (ep.thumbUrl = POSTER_OF(s.id)));
+  });
+}
 
 function makeEpisodes(count: number, freeCount: number, baseThumb: string): Episode[] {
   return Array.from({ length: count }).map((_, i) => ({
@@ -273,6 +283,9 @@ export const SERIES: Series[] = [
     episodes: makeEpisodes(38, 3, poster("photo-1529626455594-4ff0802cfb7e")),
   },
 ];
+
+// Aplicar gerador local em todas as séries (sobrescreve URLs externas quebradas)
+fillPosters();
 
 export const GENRES = [
   "Bilionário",
