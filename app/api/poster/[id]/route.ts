@@ -49,16 +49,14 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
   const { id } = await ctx.params;
   const s = findSeries(id);
 
-  const title = s?.title ?? "Vertiplay";
   const genre = s?.genre ?? "Drama";
-  const exclusive = s?.isExclusive ?? false;
   const [c1, c2, c3] = colorsFor(genre);
-  const lines = wrap(title);
 
-  // Layout 540x960 (9:16 — bom pra retina mobile)
+  // Layout 540x960 (9:16). SEM TÍTULO — o HTML já renderiza o título por cima.
+  // O poster aqui é só atmosfera visual (gradiente + textura + silhueta + watermark).
   const W = 540;
   const H = 960;
-  const titleStartY = H - 100 - lines.length * 56;
+  const seed = (s?.id ?? "x").charCodeAt(0) % 99;
 
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice">
@@ -66,26 +64,20 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
     <linearGradient id="bg" x1="0" y1="0" x2="${W}" y2="${H}" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="${c1}"/>
       <stop offset="0.5" stop-color="${c2}"/>
-      <stop offset="1" stop-color="${c3}" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="${c3}" stop-opacity="0.55"/>
     </linearGradient>
-    <radialGradient id="glow" cx="0.5" cy="0.55" r="0.6">
+    <radialGradient id="glow" cx="0.55" cy="0.4" r="0.65">
       <stop offset="0" stop-color="${c3}" stop-opacity="0.55"/>
       <stop offset="0.5" stop-color="${c2}" stop-opacity="0.2"/>
       <stop offset="1" stop-color="#000" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="vp" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#FF2E92"/>
-      <stop offset="0.6" stop-color="#7C3AED"/>
-      <stop offset="1" stop-color="#2563EB"/>
-    </linearGradient>
-    <linearGradient id="fade" x1="0" y1="0.4" x2="0" y2="1" gradientUnits="objectBoundingBox">
+    <linearGradient id="fade" x1="0" y1="0.3" x2="0" y2="1" gradientUnits="objectBoundingBox">
       <stop offset="0" stop-color="#000" stop-opacity="0"/>
-      <stop offset="0.7" stop-color="#000" stop-opacity="0.6"/>
-      <stop offset="1" stop-color="#000" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0.65"/>
     </linearGradient>
     <filter id="texture">
-      <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="2" seed="${(s?.id ?? "x").charCodeAt(0) % 99}"/>
-      <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.04 0"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" seed="${seed}"/>
+      <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.06 0"/>
       <feComposite in2="SourceGraphic" operator="in"/>
     </filter>
   </defs>
@@ -94,47 +86,13 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
   <rect width="${W}" height="${H}" fill="url(#glow)"/>
   <rect width="${W}" height="${H}" filter="url(#texture)"/>
 
-  <!-- Decorative shapes -->
-  <circle cx="${W - 60}" cy="${120}" r="${80}" fill="${c3}" opacity="0.15"/>
-  <circle cx="${60}" cy="${H - 280}" r="${140}" fill="${c2}" opacity="0.18"/>
-  <path d="M 0 ${H * 0.35} Q ${W / 2} ${H * 0.5} ${W} ${H * 0.4} L ${W} ${H * 0.65} Q ${W / 2} ${H * 0.55} 0 ${H * 0.6} Z" fill="${c3}" opacity="0.06"/>
+  <!-- Formas decorativas (atmosfera, não texto) -->
+  <circle cx="${W - 80}" cy="${180}" r="${130}" fill="${c3}" opacity="0.15"/>
+  <circle cx="${80}" cy="${H - 220}" r="${180}" fill="${c2}" opacity="0.16"/>
+  <path d="M -50 ${H * 0.6} Q ${W / 2} ${H * 0.45} ${W + 50} ${H * 0.65} L ${W + 50} ${H * 0.85} Q ${W / 2} ${H * 0.7} -50 ${H * 0.9} Z" fill="${c3}" opacity="0.08"/>
 
-  <!-- Vertiplay logo (canto sup esq) -->
-  <g transform="translate(28, 28)">
-    <rect width="44" height="44" rx="12" fill="url(#vp)"/>
-    <path d="M 16 12 L 32 22 L 16 32 Z" fill="white"/>
-  </g>
-
-  ${
-    exclusive
-      ? `<g transform="translate(${W - 180}, 36)">
-      <rect width="150" height="28" rx="14" fill="url(#vp)"/>
-      <text x="75" y="19" font-family="-apple-system, system-ui, sans-serif" font-weight="800" font-size="11" letter-spacing="1.5" fill="white" text-anchor="middle">EXCLUSIVO</text>
-    </g>`
-      : ""
-  }
-
-  <!-- Genre badge -->
-  <g transform="translate(28, ${titleStartY - 50})">
-    <rect width="${genre.length * 12 + 24}" height="32" rx="16" fill="rgba(0,0,0,0.45)" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
-    <text x="${(genre.length * 12 + 24) / 2}" y="21" font-family="-apple-system, system-ui, sans-serif" font-weight="600" font-size="13" fill="white" text-anchor="middle">${escape(genre)}</text>
-  </g>
-
-  <!-- Fade bottom -->
-  <rect y="${H * 0.4}" width="${W}" height="${H * 0.6}" fill="url(#fade)"/>
-
-  <!-- Title -->
-  <g font-family="-apple-system, 'SF Pro Display', system-ui, sans-serif" font-weight="900" fill="white">
-    ${lines
-      .map(
-        (ln, i) =>
-          `<text x="28" y="${titleStartY + i * 56}" font-size="44" letter-spacing="-1">${escape(ln)}</text>`
-      )
-      .join("\n    ")}
-  </g>
-
-  <!-- Vertiplay watermark -->
-  <text x="28" y="${H - 32}" font-family="-apple-system, system-ui, sans-serif" font-weight="700" font-size="14" fill="white" opacity="0.55" letter-spacing="2">VERTIPLAY</text>
+  <!-- Fade pra escurecer base (legibilidade do texto HTML por cima) -->
+  <rect y="${H * 0.5}" width="${W}" height="${H * 0.5}" fill="url(#fade)"/>
 </svg>`;
 
   return new Response(svg, {

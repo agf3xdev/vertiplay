@@ -37,21 +37,11 @@ const sampleVideos = [
   "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
 ];
 
-// Posters agora vêm do gerador SVG local (/api/poster/[id]).
-// Independente de fontes externas, sempre carrega, sempre on-brand.
-const POSTER_OF = (seriesId: string) => `/api/poster/${seriesId}`;
+const poster = (q: string) =>
+  `https://images.unsplash.com/${q}?auto=format&fit=crop&w=900&q=80`;
 
-const poster = (_q: string) => ""; // mantido só pra compat — overrided abaixo por id
-const banner = (_q: string) => "";
-
-// Fill helper — qualquer poster vazio é substituído pelo gerador local
-function fillPosters() {
-  SERIES.forEach((s) => {
-    s.posterUrl = POSTER_OF(s.id);
-    s.bannerUrl = POSTER_OF(s.id);
-    s.episodes.forEach((ep) => (ep.thumbUrl = POSTER_OF(s.id)));
-  });
-}
+const banner = (q: string) =>
+  `https://images.unsplash.com/${q}?auto=format&fit=crop&w=1600&q=80`;
 
 function makeEpisodes(count: number, freeCount: number, baseThumb: string): Episode[] {
   return Array.from({ length: count }).map((_, i) => ({
@@ -90,8 +80,8 @@ export const SERIES: Series[] = [
     title: "Rejeitada Pelo Alfa",
     synopsis:
       "Luna é descartada pelo próprio companheiro destinado. Anos depois, volta como a Alpha mais temida de todas as matilhas.",
-    posterUrl: poster("photo-1518709268805-4e9042af2176"),
-    bannerUrl: banner("photo-1518709268805-4e9042af2176"),
+    posterUrl: poster("photo-1494790108377-be9c29b29330"),
+    bannerUrl: banner("photo-1494790108377-be9c29b29330"),
     genre: "Lobisomem",
     tags: ["alfa", "luna", "destino"],
     isExclusive: false,
@@ -100,7 +90,7 @@ export const SERIES: Series[] = [
     rating: 4.7,
     totalEpisodes: 80,
     freeEpisodes: 3,
-    episodes: makeEpisodes(80, 3, poster("photo-1518709268805-4e9042af2176")),
+    episodes: makeEpisodes(80, 3, poster("photo-1494790108377-be9c29b29330")),
   },
   {
     id: "s3",
@@ -108,8 +98,8 @@ export const SERIES: Series[] = [
     title: "Noiva Cativa da Máfia",
     synopsis:
       "Sequestrada como acerto de dívida, ela vira a única arma do chefão contra a família rival.",
-    posterUrl: poster("photo-1535398089889-dd807df1dfaa"),
-    bannerUrl: banner("photo-1535398089889-dd807df1dfaa"),
+    posterUrl: poster("photo-1517841905240-472988babdf9"),
+    bannerUrl: banner("photo-1517841905240-472988babdf9"),
     genre: "Máfia",
     tags: ["mafia", "vinganca", "perigo"],
     isExclusive: true,
@@ -118,7 +108,7 @@ export const SERIES: Series[] = [
     rating: 4.9,
     totalEpisodes: 72,
     freeEpisodes: 3,
-    episodes: makeEpisodes(72, 3, poster("photo-1535398089889-dd807df1dfaa")),
+    episodes: makeEpisodes(72, 3, poster("photo-1517841905240-472988babdf9")),
   },
   {
     id: "s4",
@@ -180,8 +170,8 @@ export const SERIES: Series[] = [
     title: "O Aroma da Minha Luna Destinada",
     synopsis:
       "Ele sentiu o cheiro dela do outro lado do salão. Agora vai destruir tudo para mantê-la.",
-    posterUrl: poster("photo-1496180470114-6ef490f3ff22"),
-    bannerUrl: banner("photo-1496180470114-6ef490f3ff22"),
+    posterUrl: poster("photo-1502823403499-6ccfcf4fb453"),
+    bannerUrl: banner("photo-1502823403499-6ccfcf4fb453"),
     genre: "Lobisomem",
     tags: ["alfa", "luna", "destino"],
     isExclusive: false,
@@ -190,7 +180,7 @@ export const SERIES: Series[] = [
     rating: 4.4,
     totalEpisodes: 55,
     freeEpisodes: 3,
-    episodes: makeEpisodes(55, 3, poster("photo-1496180470114-6ef490f3ff22")),
+    episodes: makeEpisodes(55, 3, poster("photo-1502823403499-6ccfcf4fb453")),
   },
   {
     id: "s8",
@@ -216,8 +206,8 @@ export const SERIES: Series[] = [
     title: "A Vida Secreta do Meu Marido Bilionário",
     synopsis:
       "Após cinco anos juntos, ela descobre que o marido faxineiro é o homem mais rico do país — e está sendo caçado.",
-    posterUrl: poster("photo-1511376777868-27c8a31ad691"),
-    bannerUrl: banner("photo-1511376777868-27c8a31ad691"),
+    posterUrl: poster("photo-1500648767791-00dcc994a43e"),
+    bannerUrl: banner("photo-1500648767791-00dcc994a43e"),
     genre: "Bilionário",
     tags: ["identidade-oculta", "ceo"],
     isExclusive: true,
@@ -226,7 +216,7 @@ export const SERIES: Series[] = [
     rating: 4.9,
     totalEpisodes: 90,
     freeEpisodes: 3,
-    episodes: makeEpisodes(90, 3, poster("photo-1511376777868-27c8a31ad691")),
+    episodes: makeEpisodes(90, 3, poster("photo-1500648767791-00dcc994a43e")),
   },
   {
     id: "s10",
@@ -234,8 +224,8 @@ export const SERIES: Series[] = [
     title: "Reprodutora do Rei Alfa",
     synopsis:
       "Escolhida entre cem mulheres para gerar o herdeiro do Rei Alfa, ela vai virar o jogo.",
-    posterUrl: poster("photo-1488161628813-04466f872be2"),
-    bannerUrl: banner("photo-1488161628813-04466f872be2"),
+    posterUrl: poster("photo-1438761681033-6461ffad8d80"),
+    bannerUrl: banner("photo-1438761681033-6461ffad8d80"),
     genre: "Lobisomem",
     tags: ["alfa", "barriga-de-aluguel"],
     isExclusive: false,
@@ -244,7 +234,7 @@ export const SERIES: Series[] = [
     rating: 4.6,
     totalEpisodes: 70,
     freeEpisodes: 3,
-    episodes: makeEpisodes(70, 3, poster("photo-1488161628813-04466f872be2")),
+    episodes: makeEpisodes(70, 3, poster("photo-1438761681033-6461ffad8d80")),
   },
   {
     id: "s11",
@@ -283,9 +273,6 @@ export const SERIES: Series[] = [
     episodes: makeEpisodes(38, 3, poster("photo-1529626455594-4ff0802cfb7e")),
   },
 ];
-
-// Aplicar gerador local em todas as séries (sobrescreve URLs externas quebradas)
-fillPosters();
 
 export const GENRES = [
   "Bilionário",

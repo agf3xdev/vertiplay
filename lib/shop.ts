@@ -173,6 +173,258 @@ export const BRANDS: Brand[] = [
 const findBrand = (slug: string) => BRANDS.find((b) => b.slug === slug)!;
 
 export const PRODUCTS: Product[] = [
+  // ═══════════════════════════════════════════════════════════════
+  // PRIMUS RIO — utilidades do lar + brinquedos
+  // ═══════════════════════════════════════════════════════════════
+  {
+    id: "pr1",
+    brandId: "br1",
+    slug: "jogo-cama-queen-bordado-primus",
+    name: "Jogo de Cama Queen Bordado 4 Peças",
+    description:
+      "Conjunto Queen 4 peças (lençol + 2 fronhas + colcha) em percal 200 fios com bordado clássico. O jogo que veste a cama da Helena na mansão.",
+    imageUrl: img("pr1"),
+    gallery: [img("pr1")],
+    priceBRL: 29900,
+    oldPriceBRL: 39900,
+    category: "Casa",
+    stock: 48,
+    rating: 4.6,
+    appearances: [{ seriesId: "s1", episode: 6, sceneNote: "Quarto da Helena" }],
+  },
+  {
+    id: "pr2",
+    brandId: "br1",
+    slug: "kit-panelas-antiaderente-primus",
+    name: "Kit Panelas Antiaderente 8 Peças",
+    description:
+      "8 peças com fundo triplo, cabos baquelite, antiaderente reforçado. Indução compatível.",
+    imageUrl: img("pr2"),
+    gallery: [img("pr2")],
+    priceBRL: 39900,
+    oldPriceBRL: 59900,
+    category: "Casa",
+    stock: 32,
+    rating: 4.7,
+    appearances: [{ seriesId: "s5", sceneNote: "Cozinha do café da manhã" }],
+  },
+  {
+    id: "pr3",
+    brandId: "br1",
+    slug: "boneca-reborn-colecao-primus",
+    name: "Boneca Reborn Coleção 55cm",
+    description:
+      "Boneca colecionável reborn, vinil siliconado, roupa removível, cabelo implantado fio a fio.",
+    imageUrl: img("pr3"),
+    gallery: [img("pr3")],
+    priceBRL: 19900,
+    category: "Brinquedo",
+    stock: 18,
+    rating: 4.8,
+    appearances: [{ seriesId: "s7", sceneNote: "Brinquedo da filha" }],
+  },
+  {
+    id: "pr4",
+    brandId: "br1",
+    slug: "organizador-modular-closet-primus",
+    name: "Organizador Modular para Closet",
+    description:
+      "Sistema de 12 módulos empilháveis para roupas, sapatos e acessórios. Aço cromado + tecido.",
+    imageUrl: img("pr4"),
+    gallery: [img("pr4")],
+    priceBRL: 14900,
+    oldPriceBRL: 19900,
+    category: "Casa",
+    stock: 60,
+    rating: 4.5,
+    appearances: [{ seriesId: "s4", sceneNote: "Closet da Marina" }],
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // MUI — moda feminina, linho
+  // ═══════════════════════════════════════════════════════════════
+  {
+    id: "mui1",
+    brandId: "br2",
+    slug: "vestido-midi-linho-marinho-mui",
+    name: "Vestido Midi Linho Marinho",
+    description:
+      "Vestido midi em linho 100%, decote V, alças finas, cintura marcada. Coleção Maresia.",
+    imageUrl: img("mui1"),
+    gallery: [img("mui1")],
+    priceBRL: 36900,
+    category: "Linho",
+    stock: 12,
+    rating: 4.9,
+    appearances: [{ seriesId: "s4", episode: 8, sceneNote: "Reencontro na praia" }],
+  },
+  {
+    id: "mui2",
+    brandId: "br2",
+    slug: "macacao-linho-maresia-mui",
+    name: "Macacão Linho Coleção Maresia",
+    description:
+      "Macacão pantalona em linho rústico, decote canoa, cintura com elástico, bolsos laterais.",
+    imageUrl: img("mui2"),
+    gallery: [img("mui2")],
+    priceBRL: 38900,
+    category: "Linho",
+    stock: 8,
+    rating: 4.8,
+    appearances: [{ seriesId: "s2", sceneNote: "Luna no encontro com o conselho" }],
+  },
+  {
+    id: "mui3",
+    brandId: "br2",
+    slug: "camisa-bordada-lua-mui",
+    name: "Camisa Bordada Coleção Lua",
+    description:
+      "Camisa em linho off-white com bordado floral à mão na gola e punhos. Caimento solto.",
+    imageUrl: img("mui3"),
+    gallery: [img("mui3")],
+    priceBRL: 24900,
+    oldPriceBRL: 29900,
+    category: "Linho",
+    stock: 21,
+    rating: 4.7,
+    appearances: [{ seriesId: "s12", sceneNote: "Café da manhã na pousada" }],
+  },
+  {
+    id: "mui4",
+    brandId: "br2",
+    slug: "saia-longa-amarela-mui",
+    name: "Saia Longa Amarelo Maresia",
+    description:
+      "Saia longa godê em linho amarelo solar, cintura alta, fenda lateral discreta.",
+    imageUrl: img("mui4"),
+    gallery: [img("mui4")],
+    priceBRL: 28900,
+    category: "Linho",
+    stock: 14,
+    rating: 4.6,
+    appearances: [{ seriesId: "s10", sceneNote: "Cerimônia do casamento alfa" }],
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // O AMIGÃO — supermercado / cesta premium
+  // ═══════════════════════════════════════════════════════════════
+  {
+    id: "am1",
+    brandId: "br3",
+    slug: "cesta-gourmet-vinho-queijos-amigao",
+    name: "Cesta Gourmet — Vinho + Queijos",
+    description:
+      "Cesta com vinho tinto reserva, 4 queijos finos, geleias artesanais, biscoitos amanteigados e azeite extra-virgem. Embalagem de presente.",
+    imageUrl: img("am1"),
+    gallery: [img("am1")],
+    priceBRL: 29900,
+    oldPriceBRL: 36900,
+    category: "Cesta Premium",
+    stock: 25,
+    rating: 4.9,
+    appearances: [{ seriesId: "s1", episode: 4, sceneNote: "Jantar do Conselho" }],
+  },
+  {
+    id: "am2",
+    brandId: "br3",
+    slug: "kit-churrasco-premium-amigao",
+    name: "Kit Churrasco Premium 5kg",
+    description:
+      "Picanha + alcatra + linguiça artesanal + queijo coalho + sal grosso. Cortes selecionados Angus, peso total 5kg.",
+    imageUrl: img("am2"),
+    gallery: [img("am2")],
+    priceBRL: 39900,
+    category: "Cesta Premium",
+    stock: 40,
+    rating: 4.8,
+    appearances: [{ seriesId: "s5", sceneNote: "Churrasco surpresa na cobertura" }],
+  },
+  {
+    id: "am3",
+    brandId: "br3",
+    slug: "espumante-brasileiro-amigao",
+    name: "Espumante Brasileiro Brut Reserva",
+    description:
+      "Espumante Brut de chardonnay e pinot noir, método tradicional, safra reserva. 750ml.",
+    imageUrl: img("am3"),
+    gallery: [img("am3")],
+    priceBRL: 8990,
+    category: "Cesta Premium",
+    stock: 120,
+    rating: 4.7,
+    appearances: [
+      { seriesId: "s9", sceneNote: "Comemoração após a revelação" },
+      { seriesId: "s1" },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // TUBARÃO ATACADÃO — eletro + utilidades atacarejo
+  // ═══════════════════════════════════════════════════════════════
+  {
+    id: "tb1",
+    brandId: "br4",
+    slug: "smart-tv-50-4k-tubarao",
+    name: 'Smart TV 50" 4K HDR',
+    description:
+      'TV 50" 4K HDR, sistema Android TV, Wi-Fi, 3 HDMI. Chromecast embutido.',
+    imageUrl: img("tb1"),
+    gallery: [img("tb1")],
+    priceBRL: 219900,
+    oldPriceBRL: 279900,
+    category: "Eletrônico",
+    stock: 18,
+    rating: 4.7,
+    appearances: [{ seriesId: "s5", sceneNote: "Sala da cobertura" }],
+  },
+  {
+    id: "tb2",
+    brandId: "br4",
+    slug: "aspirador-robo-tubarao",
+    name: "Aspirador Robô Inteligente Wi-Fi",
+    description:
+      "Robô aspirador 2200Pa, mapeamento a laser, controle pelo app, 120min bateria, recarga automática.",
+    imageUrl: img("tb2"),
+    gallery: [img("tb2")],
+    priceBRL: 89900,
+    oldPriceBRL: 129900,
+    category: "Eletrônico",
+    stock: 28,
+    rating: 4.6,
+    appearances: [{ seriesId: "s8", sceneNote: "Escritório da CEO" }],
+  },
+  {
+    id: "tb3",
+    brandId: "br4",
+    slug: "cafeteira-italiana-cobre-tubarao",
+    name: "Cafeteira Italiana Cobre 6 Xícaras",
+    description:
+      "Cafeteira Moka clássica em alumínio com acabamento cobre, 6 xícaras. Indução compatível.",
+    imageUrl: img("tb3"),
+    gallery: [img("tb3")],
+    priceBRL: 11990,
+    category: "Cafeteira",
+    stock: 80,
+    rating: 4.5,
+    appearances: [{ seriesId: "s1", sceneNote: "Café da manhã do casal" }],
+  },
+  {
+    id: "tb4",
+    brandId: "br4",
+    slug: "air-fryer-12l-tubarao",
+    name: "Air Fryer 12L Família",
+    description:
+      "Fritadeira sem óleo 12 litros, painel digital, 8 funções pré-programadas, cesto removível antiaderente.",
+    imageUrl: img("tb4"),
+    gallery: [img("tb4")],
+    priceBRL: 49900,
+    oldPriceBRL: 69900,
+    category: "Eletrônico",
+    stock: 45,
+    rating: 4.8,
+    appearances: [{ seriesId: "s11", sceneNote: "Cozinha da nova casa" }],
+  },
+
   // === Da série "A Noiva do Bilionário Cruel" (s1) ===
   {
     id: "p1",
