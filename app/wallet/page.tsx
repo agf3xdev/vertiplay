@@ -38,17 +38,22 @@ function WalletInner() {
     }
   }, [sp, router]);
 
-  async function buy(type: "coins" | "vip", packId: string) {
-    setLoadingId(packId);
+  const [selected, setSelected] = useState<{ type: "coins" | "vip"; packId: string } | null>(null);
+
+  async function startPayment(method: "mp" | "stripe") {
+    if (!selected) return;
+    setLoadingId(selected.packId + ":" + method);
     try {
-      const r = await fetch("/api/stripe/checkout", {
+      const endpoint = method === "mp" ? "/api/mp/checkout" : "/api/stripe/checkout";
+      const r = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type, packId }),
+        body: JSON.stringify(selected),
       });
       const data = await r.json();
-      if (data.url) {
-        window.location.href = data.url;
+      const url = data.url || data.init_point;
+      if (url) {
+        window.location.href = url;
       } else {
         alert("Erro ao iniciar pagamento: " + (data.error ?? "desconhecido"));
         setLoadingId(null);
@@ -124,9 +129,8 @@ function WalletInner() {
         {COIN_PACKS.map((p) => (
           <button
             key={p.id}
-            onClick={() => buy("coins", p.id)}
-            disabled={loadingId === p.id}
-            className={`vp-card rounded-2xl p-4 text-left relative disabled:opacity-60 ${
+            onClick={() => setSelected({ type: "coins", packId: p.id })}
+            className={`vp-card rounded-2xl p-4 text-left relative ${
               (p as any).popular ? "border-[var(--color-vp-pink)]/60" : ""
             }`}
           >
@@ -146,9 +150,6 @@ function WalletInner() {
             </p>
             <p className="text-[11px] text-white/55">coins {p.bonus > 0 && "+ bônus"}</p>
             <p className="mt-2 font-bold vp-gradient-text">{formatBRL(p.priceBRL)}</p>
-            {loadingId === p.id && (
-              <Loader2 className="absolute top-3 right-3 w-4 h-4 animate-spin" />
-            )}
           </button>
         ))}
       </div>
@@ -164,9 +165,8 @@ function WalletInner() {
         {VIP_PLANS.map((p) => (
           <button
             key={p.id}
-            onClick={() => buy("vip", p.id)}
-            disabled={loadingId === p.id}
-            className={`vp-card rounded-2xl p-4 w-full flex justify-between items-center text-left disabled:opacity-60 ${
+            onClick={() => setSelected({ type: "vip", packId: p.id })}
+            className={`vp-card rounded-2xl p-4 w-full flex justify-between items-center text-left ${
               (p as any).popular ? "border-[var(--color-vp-pink)]/60" : ""
             }`}
           >
@@ -196,6 +196,95 @@ function WalletInner() {
       <p className="text-[10px] text-white/35 text-center mt-6">
         Pagamentos processados via Stripe e Mercado Pago. Renovação automática que pode ser cancelada a qualquer momento.
       </p>
+
+      {/* Sheet de seleção de método */}
+      {selected && (
+        <PaymentSheet
+          selected={selected}
+          loadingId={loadingId}
+          onClose={() => setSelected(null)}
+          onPay={startPayment}
+        />
+      )}
+    </div>
+  );
+}
+
+function PaymentSheet({
+  selected,
+  loadingId,
+  onClose,
+  onPay,
+}: {
+  selected: { type: "coins" | "vip"; packId: string };
+  loadingId: string | null;
+  onClose: () => void;
+  onPay: (m: "mp" | "stripe") => void;
+}) {
+  const pack =
+    selected.type === "coins"
+      ? COIN_PACKS.find((p) => p.id === selected.packId)
+      : VIP_PLANS.find((p) => p.id === selected.packId);
+  const price = pack ? formatBRL((pack as any).priceBRL) : "";
+  const label =
+    selected.type === "coins"
+      ? `${(pack as any)?.coins} coins${(pack as any)?.bonus ? ` + ${(pack as any).bonus} bônus` : ""}`
+      : (pack as any)?.name;
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-end" onClick={onClose}>
+      <div
+        className="w-full max-w-[480px] mx-auto bg-[var(--color-vp-bg)] rounded-t-3xl p-5 safe-bottom"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4" />
+        <h3 className="font-bold text-lg mb-1">Escolha o pagamento</h3>
+        <p className="text-sm text-white/65 mb-4">
+          {label} · <b className="vp-gradient-text">{price}</b>
+        </p>
+
+        <button
+          onClick={() => onPay("mp")}
+          disabled={loadingId !== null}
+          className="vp-card rounded-2xl w-full p-4 mb-2 flex items-center gap-3 disabled:opacity-50"
+        >
+          <div className="w-10 h-10 rounded-xl bg-[#00B1EA] flex items-center justify-center font-bold">
+            MP
+          </div>
+          <div className="flex-1 text-left">
+            <p className="font-semibold text-sm">Mercado Pago</p>
+            <p className="text-[11px] text-white/55">PIX, cartão, boleto · até 6x</p>
+          </div>
+          {loadingId === selected.packId + ":mp" ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <span className="vp-gradient text-[10px] font-bold px-2 py-0.5 rounded-full">
+              Recomendado
+            </span>
+          )}
+        </button>
+
+        <button
+          onClick={() => onPay("stripe")}
+          disabled={loadingId !== null}
+          className="vp-card rounded-2xl w-full p-4 flex items-center gap-3 disabled:opacity-50"
+        >
+          <div className="w-10 h-10 rounded-xl bg-[#635BFF] flex items-center justify-center font-bold">
+            S
+          </div>
+          <div className="flex-1 text-left">
+            <p className="font-semibold text-sm">Stripe</p>
+            <p className="text-[11px] text-white/55">Cartão internacional</p>
+          </div>
+          {loadingId === selected.packId + ":stripe" && (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          )}
+        </button>
+
+        <button onClick={onClose} className="block mx-auto mt-4 text-sm text-white/55">
+          Cancelar
+        </button>
+      </div>
     </div>
   );
 }
