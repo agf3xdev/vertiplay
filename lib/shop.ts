@@ -42,7 +42,7 @@ const logo = (q: string) =>
 export const BRANDS: Brand[] = [
   {
     id: "b1",
-    slug: "ateliê-bela",
+    slug: "atelie-bela",
     name: "Ateliê Bela",
     logoUrl: logo("photo-1469334031218-e382a71b716b"),
     coverUrl: img("photo-1490481651871-ab68de25d43d"),
@@ -75,7 +75,7 @@ export const BRANDS: Brand[] = [
   },
   {
     id: "b4",
-    slug: "domínio-relógios",
+    slug: "dominio-relogios",
     name: "Domínio Relógios",
     logoUrl: logo("photo-1523275335684-37898b6baf30"),
     coverUrl: img("photo-1542496658-e33a6d0d50f6"),
@@ -86,7 +86,7 @@ export const BRANDS: Brand[] = [
   },
   {
     id: "b5",
-    slug: "luminária-casa",
+    slug: "luminaria-casa",
     name: "Luminária Casa",
     logoUrl: logo("photo-1565814329452-e1efa11c5b89"),
     coverUrl: img("photo-1513506003901-1e6a229e2d15"),
@@ -125,7 +125,7 @@ export const PRODUCTS: Product[] = [
   // === Da série "A Noiva do Bilionário Cruel" (s1) ===
   {
     id: "p1",
-    brandId: findBrand("ateliê-bela").id,
+    brandId: findBrand("atelie-bela").id,
     slug: "vestido-helena-jantar",
     name: "Vestido Helena — Jantar",
     description:
@@ -144,7 +144,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "p2",
-    brandId: findBrand("domínio-relógios").id,
+    brandId: findBrand("dominio-relogios").id,
     slug: "relogio-bilionario-aco",
     name: "Relógio Bilionário Aço Negro",
     description:
@@ -216,7 +216,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "p6",
-    brandId: findBrand("ateliê-bela").id,
+    brandId: findBrand("atelie-bela").id,
     slug: "vestido-luna-cerimonia",
     name: "Vestido Luna — Cerimônia",
     description:
@@ -266,7 +266,7 @@ export const PRODUCTS: Product[] = [
   // === "Casei com o Inimigo" (s4) ===
   {
     id: "p9",
-    brandId: findBrand("ateliê-bela").id,
+    brandId: findBrand("atelie-bela").id,
     slug: "vestido-noiva-vermelho",
     name: "Vestido de Noiva Vermelho",
     description:
@@ -332,7 +332,7 @@ export const PRODUCTS: Product[] = [
   // === "Chefona" (s8) ===
   {
     id: "p13",
-    brandId: findBrand("ateliê-bela").id,
+    brandId: findBrand("atelie-bela").id,
     slug: "blazer-poder",
     name: "Blazer Poder — Alfaiataria",
     description:
@@ -347,7 +347,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "p14",
-    brandId: findBrand("luminária-casa").id,
+    brandId: findBrand("luminaria-casa").id,
     slug: "luminaria-arco-dourada",
     name: "Luminária Arco Dourada",
     description: "Arco dourado, base mármore, lâmpada LED. A luz do escritório dela.",
