@@ -11,17 +11,19 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.png", type: "image/png", sizes: "32x32" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/icon-512.png", type: "image/png", sizes: "512x512" },
     ],
-    apple: "/icon.svg",
-    shortcut: "/icon.svg",
+    apple: "/icon-192.png",
+    shortcut: "/favicon.png",
   },
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Vertiplay" },
   openGraph: {
     title: "Vertiplay",
     description: "Mini-novelas verticais. Drama em 60 segundos.",
     type: "website",
-    images: [{ url: "/logo.svg", width: 320, height: 110, alt: "Vertiplay" }],
+    images: [{ url: "/logo.jpg", width: 1008, height: 419, alt: "Vertiplay" }],
   },
 };
 

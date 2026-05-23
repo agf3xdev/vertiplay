@@ -33,11 +33,13 @@ export type Product = {
   appearances: { seriesId: string; episode?: number; sceneNote?: string }[];
 };
 
-// Imagens via geradores SVG locais (/api/brand-logo, /api/brand-cover, /api/product-img)
-// Independente de fontes externas, sempre carrega, on-brand
-const logo = (slug: string) => `/api/brand-logo/${slug}`;
-const cover = (slug: string) => `/api/brand-cover/${slug}`;
-const img = (id: string) => `/api/product-img/${id}`;
+// Imagens reais via Unsplash CDN
+const img = (q: string) =>
+  `https://images.unsplash.com/${q}?auto=format&fit=crop&w=900&q=80`;
+const logo = (q: string) =>
+  `https://images.unsplash.com/${q}?auto=format&fit=crop&w=300&q=80`;
+const cover = (q: string) =>
+  `https://images.unsplash.com/${q}?auto=format&fit=crop&w=1600&q=80`;
 
 export const BRANDS: Brand[] = [
   // ═══════════════ MARCAS REAIS PARCEIRAS ═══════════════
@@ -45,8 +47,8 @@ export const BRANDS: Brand[] = [
     id: "br1",
     slug: "primus-rio",
     name: "Primus Rio",
-    logoUrl: logo("primus-rio"),
-    coverUrl: cover("primus-rio"),
+    logoUrl: logo("photo-1556228453-efd6c1ff04f6"),
+    coverUrl: cover("photo-1556909114-f6e7ad7d3136"),
     bio:
       "Utilidades para o lar e brinquedos no atacado e varejo. Frete grátis Sul/Sudeste/Centro-Oeste acima de R$ 150. Direto do Rio pra sua casa.",
     website: "https://primusrio.plataformaneo.com.br",
@@ -57,8 +59,8 @@ export const BRANDS: Brand[] = [
     id: "br2",
     slug: "mui",
     name: "MUI",
-    logoUrl: logo("mui"),
-    coverUrl: cover("mui"),
+    logoUrl: logo("photo-1469334031218-e382a71b716b"),
+    coverUrl: cover("photo-1490481651871-ab68de25d43d"),
     bio:
       "Moda feminina contemporânea. Peças autorais em linho, bordados artesanais e estética coastal. Coleções Lua e Maresia.",
     website: "https://www.usemui.com.br",
@@ -69,8 +71,8 @@ export const BRANDS: Brand[] = [
     id: "br3",
     slug: "o-amigao",
     name: "O Amigão",
-    logoUrl: logo("o-amigao"),
-    coverUrl: cover("o-amigao"),
+    logoUrl: logo("photo-1542838132-92c53300491e"),
+    coverUrl: cover("photo-1542838132-92c53300491e"),
     bio:
       "Supermercado nascido no Rio em 1997. 41 lojas, mais de 9 mil produtos. O bairro com preço de atacado.",
     website: "https://oamigao.com.br",
@@ -81,8 +83,8 @@ export const BRANDS: Brand[] = [
     id: "br4",
     slug: "tubarao-atacadao",
     name: "Tubarão Atacadão",
-    logoUrl: logo("tubarao-atacadao"),
-    coverUrl: cover("tubarao-atacadao"),
+    logoUrl: logo("photo-1581092334651-ddf26d9a09d0"),
+    coverUrl: cover("photo-1581092334651-ddf26d9a09d0"),
     bio:
       "Atacarejo carioca. 13 megastores no RJ + 2 em MG. +50 mil itens — utilidades, eletro, ferramentas, decoração. Preço de atacado mesmo levando 1 só.",
     website: "https://www.tubaraoatacadao.com.br",
@@ -95,8 +97,8 @@ export const BRANDS: Brand[] = [
     id: "b1",
     slug: "atelie-bela",
     name: "Ateliê Bela",
-    logoUrl: logo("atelie-bela"),
-    coverUrl: cover("atelie-bela"),
+    logoUrl: logo("photo-1469334031218-e382a71b716b"),
+    coverUrl: cover("photo-1490481651871-ab68de25d43d"),
     bio: "Vestidos sob medida feitos no Rio de Janeiro. Cada peça conta uma história.",
     website: "https://ateliebela.com.br",
     category: "Moda",
@@ -106,8 +108,8 @@ export const BRANDS: Brand[] = [
     id: "b2",
     slug: "casa-norte",
     name: "Casa Norte",
-    logoUrl: logo("casa-norte"),
-    coverUrl: cover("casa-norte"),
+    logoUrl: logo("photo-1556228453-efd6c1ff04f6"),
+    coverUrl: cover("photo-1555041469-a586c61ea9bc"),
     bio: "Móveis autorais e ambientação cinematográfica. Decoração com personalidade.",
     website: "https://casanorte.com.br",
     category: "Casa",
@@ -117,8 +119,8 @@ export const BRANDS: Brand[] = [
     id: "b3",
     slug: "fervor-perfumaria",
     name: "Fervor Perfumaria",
-    logoUrl: logo("fervor-perfumaria"),
-    coverUrl: cover("fervor-perfumaria"),
+    logoUrl: logo("photo-1541643600914-78b084683601"),
+    coverUrl: cover("photo-1592945403244-b3fbafd7f539"),
     bio: "Perfumes artesanais brasileiros. Notas de cinema, paixão e drama.",
     website: "https://fervor.com.br",
     category: "Beleza",
@@ -128,8 +130,8 @@ export const BRANDS: Brand[] = [
     id: "b4",
     slug: "dominio-relogios",
     name: "Domínio Relógios",
-    logoUrl: logo("dominio-relogios"),
-    coverUrl: cover("dominio-relogios"),
+    logoUrl: logo("photo-1523275335684-37898b6baf30"),
+    coverUrl: cover("photo-1542496658-e33a6d0d50f6"),
     bio: "Relógios para quem comanda o tempo. Edições limitadas e suíças.",
     website: "https://dominio.com.br",
     category: "Joias",
@@ -139,8 +141,8 @@ export const BRANDS: Brand[] = [
     id: "b5",
     slug: "luminaria-casa",
     name: "Luminária Casa",
-    logoUrl: logo("luminaria-casa"),
-    coverUrl: cover("luminaria-casa"),
+    logoUrl: logo("photo-1565814329452-e1efa11c5b89"),
+    coverUrl: cover("photo-1513506003901-1e6a229e2d15"),
     bio: "Iluminação cinematográfica para a sua casa virar set de novela.",
     website: "https://luminariacasa.com.br",
     category: "Casa",
@@ -150,8 +152,8 @@ export const BRANDS: Brand[] = [
     id: "b6",
     slug: "joalheria-tropical",
     name: "Joalheria Tropical",
-    logoUrl: logo("joalheria-tropical"),
-    coverUrl: cover("joalheria-tropical"),
+    logoUrl: logo("photo-1543294001-f7cd5d7fb516"),
+    coverUrl: cover("photo-1599643478518-a784e5dc4c8f"),
     bio: "Ouro 18k, pedras brasileiras. As joias que aparecem nos closes mais marcantes.",
     website: "https://tropicaljoias.com.br",
     category: "Joias",
@@ -161,8 +163,8 @@ export const BRANDS: Brand[] = [
     id: "b7",
     slug: "eletro-prime",
     name: "Eletro Prime",
-    logoUrl: logo("eletro-prime"),
-    coverUrl: cover("eletro-prime"),
+    logoUrl: logo("photo-1581092334651-ddf26d9a09d0"),
+    coverUrl: cover("photo-1556909114-f6e7ad7d3136"),
     bio: "Eletrodomésticos premium. A geladeira que aparece na cozinha da Helena.",
     website: "https://eletroprime.com.br",
     category: "Eletro",
@@ -183,8 +185,8 @@ export const PRODUCTS: Product[] = [
     name: "Jogo de Cama Queen Bordado 4 Peças",
     description:
       "Conjunto Queen 4 peças (lençol + 2 fronhas + colcha) em percal 200 fios com bordado clássico. O jogo que veste a cama da Helena na mansão.",
-    imageUrl: img("pr1"),
-    gallery: [img("pr1")],
+    imageUrl: img("photo-1631049307264-da0ec9d70304"),
+    gallery: [img("photo-1631049307264-da0ec9d70304")],
     priceBRL: 29900,
     oldPriceBRL: 39900,
     category: "Casa",
@@ -199,8 +201,8 @@ export const PRODUCTS: Product[] = [
     name: "Kit Panelas Antiaderente 8 Peças",
     description:
       "8 peças com fundo triplo, cabos baquelite, antiaderente reforçado. Indução compatível.",
-    imageUrl: img("pr2"),
-    gallery: [img("pr2")],
+    imageUrl: img("photo-1584990347449-a8d04dad94e2"),
+    gallery: [img("photo-1584990347449-a8d04dad94e2")],
     priceBRL: 39900,
     oldPriceBRL: 59900,
     category: "Casa",
@@ -215,8 +217,8 @@ export const PRODUCTS: Product[] = [
     name: "Boneca Reborn Coleção 55cm",
     description:
       "Boneca colecionável reborn, vinil siliconado, roupa removível, cabelo implantado fio a fio.",
-    imageUrl: img("pr3"),
-    gallery: [img("pr3")],
+    imageUrl: img("photo-1558877385-81a1c7e67d72"),
+    gallery: [img("photo-1558877385-81a1c7e67d72")],
     priceBRL: 19900,
     category: "Brinquedo",
     stock: 18,
@@ -230,8 +232,8 @@ export const PRODUCTS: Product[] = [
     name: "Organizador Modular para Closet",
     description:
       "Sistema de 12 módulos empilháveis para roupas, sapatos e acessórios. Aço cromado + tecido.",
-    imageUrl: img("pr4"),
-    gallery: [img("pr4")],
+    imageUrl: img("photo-1558997519-83ea9252edf8"),
+    gallery: [img("photo-1558997519-83ea9252edf8")],
     priceBRL: 14900,
     oldPriceBRL: 19900,
     category: "Casa",
@@ -250,8 +252,8 @@ export const PRODUCTS: Product[] = [
     name: "Vestido Midi Linho Marinho",
     description:
       "Vestido midi em linho 100%, decote V, alças finas, cintura marcada. Coleção Maresia.",
-    imageUrl: img("mui1"),
-    gallery: [img("mui1")],
+    imageUrl: img("photo-1612722432474-b971cdcea546"),
+    gallery: [img("photo-1612722432474-b971cdcea546")],
     priceBRL: 36900,
     category: "Linho",
     stock: 12,
@@ -265,8 +267,8 @@ export const PRODUCTS: Product[] = [
     name: "Macacão Linho Coleção Maresia",
     description:
       "Macacão pantalona em linho rústico, decote canoa, cintura com elástico, bolsos laterais.",
-    imageUrl: img("mui2"),
-    gallery: [img("mui2")],
+    imageUrl: img("photo-1572804013427-4d7ca7268217"),
+    gallery: [img("photo-1572804013427-4d7ca7268217")],
     priceBRL: 38900,
     category: "Linho",
     stock: 8,
@@ -280,8 +282,8 @@ export const PRODUCTS: Product[] = [
     name: "Camisa Bordada Coleção Lua",
     description:
       "Camisa em linho off-white com bordado floral à mão na gola e punhos. Caimento solto.",
-    imageUrl: img("mui3"),
-    gallery: [img("mui3")],
+    imageUrl: img("photo-1551163943-3f7053a3b8b3"),
+    gallery: [img("photo-1551163943-3f7053a3b8b3")],
     priceBRL: 24900,
     oldPriceBRL: 29900,
     category: "Linho",
@@ -296,8 +298,8 @@ export const PRODUCTS: Product[] = [
     name: "Saia Longa Amarelo Maresia",
     description:
       "Saia longa godê em linho amarelo solar, cintura alta, fenda lateral discreta.",
-    imageUrl: img("mui4"),
-    gallery: [img("mui4")],
+    imageUrl: img("photo-1583496661160-fb5886a13d63"),
+    gallery: [img("photo-1583496661160-fb5886a13d63")],
     priceBRL: 28900,
     category: "Linho",
     stock: 14,
@@ -315,8 +317,8 @@ export const PRODUCTS: Product[] = [
     name: "Cesta Gourmet — Vinho + Queijos",
     description:
       "Cesta com vinho tinto reserva, 4 queijos finos, geleias artesanais, biscoitos amanteigados e azeite extra-virgem. Embalagem de presente.",
-    imageUrl: img("am1"),
-    gallery: [img("am1")],
+    imageUrl: img("photo-1547595628-c61a29f496f0"),
+    gallery: [img("photo-1547595628-c61a29f496f0")],
     priceBRL: 29900,
     oldPriceBRL: 36900,
     category: "Cesta Premium",
@@ -331,8 +333,8 @@ export const PRODUCTS: Product[] = [
     name: "Kit Churrasco Premium 5kg",
     description:
       "Picanha + alcatra + linguiça artesanal + queijo coalho + sal grosso. Cortes selecionados Angus, peso total 5kg.",
-    imageUrl: img("am2"),
-    gallery: [img("am2")],
+    imageUrl: img("photo-1558030006-450675393462"),
+    gallery: [img("photo-1558030006-450675393462")],
     priceBRL: 39900,
     category: "Cesta Premium",
     stock: 40,
@@ -346,8 +348,8 @@ export const PRODUCTS: Product[] = [
     name: "Espumante Brasileiro Brut Reserva",
     description:
       "Espumante Brut de chardonnay e pinot noir, método tradicional, safra reserva. 750ml.",
-    imageUrl: img("am3"),
-    gallery: [img("am3")],
+    imageUrl: img("photo-1547595628-c61a29f496f0"),
+    gallery: [img("photo-1547595628-c61a29f496f0")],
     priceBRL: 8990,
     category: "Cesta Premium",
     stock: 120,
@@ -368,8 +370,8 @@ export const PRODUCTS: Product[] = [
     name: 'Smart TV 50" 4K HDR',
     description:
       'TV 50" 4K HDR, sistema Android TV, Wi-Fi, 3 HDMI. Chromecast embutido.',
-    imageUrl: img("tb1"),
-    gallery: [img("tb1")],
+    imageUrl: img("photo-1593359677879-a4bb92f829d1"),
+    gallery: [img("photo-1593359677879-a4bb92f829d1")],
     priceBRL: 219900,
     oldPriceBRL: 279900,
     category: "Eletrônico",
@@ -384,8 +386,8 @@ export const PRODUCTS: Product[] = [
     name: "Aspirador Robô Inteligente Wi-Fi",
     description:
       "Robô aspirador 2200Pa, mapeamento a laser, controle pelo app, 120min bateria, recarga automática.",
-    imageUrl: img("tb2"),
-    gallery: [img("tb2")],
+    imageUrl: img("photo-1567013127542-490d757e51fc"),
+    gallery: [img("photo-1567013127542-490d757e51fc")],
     priceBRL: 89900,
     oldPriceBRL: 129900,
     category: "Eletrônico",
@@ -400,8 +402,8 @@ export const PRODUCTS: Product[] = [
     name: "Cafeteira Italiana Cobre 6 Xícaras",
     description:
       "Cafeteira Moka clássica em alumínio com acabamento cobre, 6 xícaras. Indução compatível.",
-    imageUrl: img("tb3"),
-    gallery: [img("tb3")],
+    imageUrl: img("photo-1559305616-e7a8a6fb7f24"),
+    gallery: [img("photo-1559305616-e7a8a6fb7f24")],
     priceBRL: 11990,
     category: "Cafeteira",
     stock: 80,
@@ -415,8 +417,8 @@ export const PRODUCTS: Product[] = [
     name: "Air Fryer 12L Família",
     description:
       "Fritadeira sem óleo 12 litros, painel digital, 8 funções pré-programadas, cesto removível antiaderente.",
-    imageUrl: img("tb4"),
-    gallery: [img("tb4")],
+    imageUrl: img("photo-1626806787461-102c1bfaaea1"),
+    gallery: [img("photo-1626806787461-102c1bfaaea1")],
     priceBRL: 49900,
     oldPriceBRL: 69900,
     category: "Eletrônico",
