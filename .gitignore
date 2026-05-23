@@ -12,3 +12,4 @@ prisma/*.db-journal
 .idea
 .vscode
 prisma/stories.json
+prisma/ledger.json

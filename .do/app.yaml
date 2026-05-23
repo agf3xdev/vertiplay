@@ -6,10 +6,9 @@ name: vertiplay
 region: nyc
 services:
   - name: web
-    github:
-      repo: agf3xdev/vertiplay
+    git:
+      repo_clone_url: https://github.com/agf3xdev/vertiplay.git
       branch: main
-      deploy_on_push: true
     dockerfile_path: Dockerfile
     instance_size_slug: apps-s-1vcpu-0.5gb
     instance_count: 1

@@ -1,10 +1,10 @@
 "use client";
 import { useWallet } from "@/lib/store";
 import { COIN_PACKS, VIP_PLANS, formatBRL } from "@/lib/catalog";
-import { Coins, Crown, Sparkles, ChevronLeft, Check } from "lucide-react";
+import { Coins, Crown, Sparkles, ChevronLeft, Check, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState, useEffect } from "react";
 
 export default function WalletPage() {
   return (
@@ -24,6 +24,40 @@ function WalletInner() {
   const vipExpires = useWallet((s) => s.vipExpiresAt);
   const addCoins = useWallet((s) => s.addCoins);
   const activateVip = useWallet((s) => s.activateVip);
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+
+  // Após retorno do Stripe com ?paid=1, o webhook cuida do crédito no backend.
+  // Aqui, no MVP, fazemos um soft-credit visual quando sid presente — em prod, refetch do user.
+  useEffect(() => {
+    if (sp.get("paid") === "1") {
+      const sid = sp.get("sid");
+      const pack = sid ? null : null;
+      // Lógica real: backend já creditou via webhook → frontend só refeed.
+      // Aqui só limpa a query.
+      router.replace("/wallet");
+    }
+  }, [sp, router]);
+
+  async function buy(type: "coins" | "vip", packId: string) {
+    setLoadingId(packId);
+    try {
+      const r = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type, packId }),
+      });
+      const data = await r.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Erro ao iniciar pagamento: " + (data.error ?? "desconhecido"));
+        setLoadingId(null);
+      }
+    } catch (e) {
+      alert("Erro de rede");
+      setLoadingId(null);
+    }
+  }
 
   return (
     <div className="px-4 pt-4 safe-top pb-8">
@@ -90,8 +124,9 @@ function WalletInner() {
         {COIN_PACKS.map((p) => (
           <button
             key={p.id}
-            onClick={() => addCoins(p.coins, p.bonus)}
-            className={`vp-card rounded-2xl p-4 text-left relative ${
+            onClick={() => buy("coins", p.id)}
+            disabled={loadingId === p.id}
+            className={`vp-card rounded-2xl p-4 text-left relative disabled:opacity-60 ${
               (p as any).popular ? "border-[var(--color-vp-pink)]/60" : ""
             }`}
           >
@@ -111,6 +146,9 @@ function WalletInner() {
             </p>
             <p className="text-[11px] text-white/55">coins {p.bonus > 0 && "+ bônus"}</p>
             <p className="mt-2 font-bold vp-gradient-text">{formatBRL(p.priceBRL)}</p>
+            {loadingId === p.id && (
+              <Loader2 className="absolute top-3 right-3 w-4 h-4 animate-spin" />
+            )}
           </button>
         ))}
       </div>
@@ -126,8 +164,9 @@ function WalletInner() {
         {VIP_PLANS.map((p) => (
           <button
             key={p.id}
-            onClick={() => activateVip(p.days)}
-            className={`vp-card rounded-2xl p-4 w-full flex justify-between items-center text-left ${
+            onClick={() => buy("vip", p.id)}
+            disabled={loadingId === p.id}
+            className={`vp-card rounded-2xl p-4 w-full flex justify-between items-center text-left disabled:opacity-60 ${
               (p as any).popular ? "border-[var(--color-vp-pink)]/60" : ""
             }`}
           >
