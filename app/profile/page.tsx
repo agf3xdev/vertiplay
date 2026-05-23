@@ -2,6 +2,7 @@
 import { useWallet } from "@/lib/store";
 import { SERIES, formatBRL } from "@/lib/catalog";
 import { BRANDS, PRODUCTS } from "@/lib/shop";
+import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 import { Logo } from "@/components/Logo";
@@ -15,9 +16,11 @@ import {
   HelpCircle,
   LogOut,
   Coins,
+  LogIn,
 } from "lucide-react";
 
 export default function ProfilePage() {
+  const { data: session, status } = useSession();
   const paid = useWallet((s) => s.coinsPaid);
   const bonus = useWallet((s) => s.coinsBonus);
   const watchlist = useWallet((s) => s.watchlist);
@@ -28,6 +31,10 @@ export default function ProfilePage() {
   const saved = SERIES.filter((s) => watchlist.includes(s.id));
   const followedBrands = BRANDS.filter((b) => brandFollows.includes(b.id));
 
+  const userName = session?.user?.name ?? "Convidado";
+  const userEmail = session?.user?.email ?? "Não logado";
+  const userInitial = (session?.user?.name?.[0] ?? "V").toUpperCase();
+
   return (
     <div className="pb-8">
       <div className="px-4 pt-4 safe-top">
@@ -37,18 +44,37 @@ export default function ProfilePage() {
       {/* Card de perfil */}
       <div className="px-4 mt-4">
         <div className="vp-card rounded-3xl p-5 flex items-center gap-3">
-          <div className="w-16 h-16 rounded-full vp-gradient flex items-center justify-center text-2xl font-bold">
-            D
-          </div>
+          {session?.user?.image ? (
+            <Image
+              src={session.user.image}
+              alt={userName}
+              width={64}
+              height={64}
+              className="w-16 h-16 rounded-full object-cover"
+              unoptimized
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-full vp-gradient flex items-center justify-center text-2xl font-bold">
+              {userInitial}
+            </div>
+          )}
           <div className="flex-1">
-            <p className="font-bold text-lg">Diogo</p>
-            <p className="text-xs text-white/55">livoolivecommerce@gmail.com</p>
+            <p className="font-bold text-lg">{userName}</p>
+            <p className="text-xs text-white/55">{userEmail}</p>
             {isVip && (
               <span className="inline-flex items-center gap-1 text-[10px] vp-gradient px-2 py-0.5 rounded-full mt-1 font-bold">
                 <Crown className="w-3 h-3" /> VIP
               </span>
             )}
           </div>
+          {status !== "authenticated" && (
+            <Link
+              href="/auth"
+              className="vp-gradient text-xs font-bold px-3 py-2 rounded-xl"
+            >
+              Entrar
+            </Link>
+          )}
         </div>
 
         <Link
@@ -145,7 +171,18 @@ export default function ProfilePage() {
         <MenuItem icon={Crown} label="Assinar VIP" href="/wallet" />
         <MenuItem icon={Settings} label="Configurações" href="#" />
         <MenuItem icon={HelpCircle} label="Ajuda & suporte" href="#" />
-        <MenuItem icon={LogOut} label="Sair" href="#" danger />
+        {status === "authenticated" ? (
+          <button
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="flex items-center gap-3 vp-card rounded-2xl px-4 py-3 w-full text-left"
+          >
+            <LogOut className="w-4 h-4 text-red-400" />
+            <span className="flex-1 text-red-400">Sair</span>
+            <ChevronRight className="w-4 h-4 text-white/30" />
+          </button>
+        ) : (
+          <MenuItem icon={LogIn} label="Entrar com Google" href="/auth" />
+        )}
       </div>
 
       <p className="text-center text-[10px] text-white/35 mt-6">

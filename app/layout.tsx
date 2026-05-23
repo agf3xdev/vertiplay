@@ -1,6 +1,7 @@
 import "../styles/globals.css";
 import type { Metadata, Viewport } from "next";
 import { BottomNav } from "@/components/BottomNav";
+import { SessionProviderWrapper } from "./SessionProviderWrapper";
 
 export const metadata: Metadata = {
   title: "Vertiplay — Novelas curtas no seu bolso",
@@ -29,10 +30,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR">
       <body>
-        <div className="mobile-frame">
-          <main className="pb-20">{children}</main>
-          <BottomNav />
-        </div>
+        <SessionProviderWrapper>
+          <div className="mobile-frame">
+            <main className="pb-20">{children}</main>
+            <BottomNav />
+          </div>
+        </SessionProviderWrapper>
       </body>
     </html>
   );
