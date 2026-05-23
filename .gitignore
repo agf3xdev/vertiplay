@@ -15,3 +15,4 @@ prisma/stories.json
 prisma/ledger.json
 prisma/users.json
 prisma/friendships.json
+prisma/email-codes.json
