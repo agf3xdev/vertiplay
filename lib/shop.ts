@@ -201,8 +201,8 @@ export const PRODUCTS: Product[] = [
     name: "Kit Panelas Antiaderente 8 Peças",
     description:
       "8 peças com fundo triplo, cabos baquelite, antiaderente reforçado. Indução compatível.",
-    imageUrl: img("photo-1584990347449-a8d04dad94e2"),
-    gallery: [img("photo-1584990347449-a8d04dad94e2")],
+    imageUrl: img("photo-1556909114-f6e7ad7d3136"),
+    gallery: [img("photo-1556909114-f6e7ad7d3136")],
     priceBRL: 39900,
     oldPriceBRL: 59900,
     category: "Casa",

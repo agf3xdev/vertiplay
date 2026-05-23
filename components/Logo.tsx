@@ -1,19 +1,21 @@
-// Logo oficial do Vertiplay — usa a imagem JPG enviada pelo cliente
-// (/public/logo.jpg). Para ícone quadrado (favicon, profile), /public/icon.jpg.
+// Logo Vertiplay
+// - Símbolo V: PNG transparente (processado via rembg do JPG oficial)
+// - Wordmark "Verti" + "play": texto HTML, nítido em qualquer tamanho
 
 import Image from "next/image";
+import { cn } from "@/lib/cn";
 
 type Props = {
-  size?: number;
-  iconOnly?: boolean;
+  size?: number;          // altura do símbolo em px
+  iconOnly?: boolean;     // só o V (favicon, profile avatar)
   className?: string;
 };
 
-export function Logo({ size = 36, iconOnly = false, className }: Props) {
+export function Logo({ size = 32, iconOnly = false, className }: Props) {
   if (iconOnly) {
     return (
       <Image
-        src="/icon.jpg"
+        src="/logo-v.png"
         alt="Vertiplay"
         width={size}
         height={size}
@@ -24,16 +26,26 @@ export function Logo({ size = 36, iconOnly = false, className }: Props) {
     );
   }
 
-  // Proporção do arquivo original: 1008x419 ≈ 2.4 : 1
+  // V symbol é ~271x210 → ratio 1.29
+  const symbolWidth = Math.round(size * 1.29);
+
   return (
-    <Image
-      src="/logo.jpg"
-      alt="Vertiplay"
-      width={Math.round(size * 2.4)}
-      height={size}
-      className={className}
-      priority
-      unoptimized
-    />
+    <div className={cn("inline-flex items-center gap-2", className)}>
+      <Image
+        src="/logo-v.png"
+        alt=""
+        width={symbolWidth}
+        height={size}
+        priority
+        unoptimized
+        aria-hidden
+      />
+      <span
+        className="font-extrabold tracking-tight text-white leading-none"
+        style={{ fontSize: size * 0.85 }}
+      >
+        Verti<span className="font-light">play</span>
+      </span>
+    </div>
   );
 }
