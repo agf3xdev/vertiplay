@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, BadgeCheck, Star, ShoppingBag, Check, Truck, Shield } from "lucide-react";
+import { ChevronLeft, BadgeCheck, Star, ShoppingBag, Check, Truck, Shield, Gift } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatBRL, type Series } from "@/lib/catalog";
 import { useWallet } from "@/lib/store";
@@ -159,6 +159,13 @@ export function ProductPageClient({
       {/* CTA fixo */}
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] safe-bottom z-30 bg-[rgba(10,6,18,0.95)] border-t border-white/8 px-4 py-3 backdrop-blur-md">
         <div className="flex gap-2">
+          <Link
+            href={`/gifts/send?kind=product&payload=${encodeURIComponent(product.slug)}`}
+            className="w-14 py-3.5 rounded-2xl bg-white/10 flex items-center justify-center"
+            aria-label="Presentear"
+          >
+            <Gift className="w-4 h-4" />
+          </Link>
           <button
             onClick={() => addToCart(product.id, qty)}
             className="flex-1 py-3.5 rounded-2xl bg-white/10 font-bold flex items-center justify-center gap-2"
@@ -171,7 +178,7 @@ export function ProductPageClient({
             onClick={() => addToCart(product.id, qty)}
             className="flex-1 py-3.5 rounded-2xl vp-gradient vp-glow font-bold text-center"
           >
-            Comprar agora
+            Comprar
           </Link>
         </div>
       </div>

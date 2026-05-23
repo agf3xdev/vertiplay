@@ -1,9 +1,10 @@
 "use client";
-// Estado global do app — wallet, watchlist, unlocks, check-in.
-// Persiste em localStorage (MVP). No prod, sync com /api/wallet.
+// Estado global do app — wallet, watchlist, unlocks, check-in, social.
+// Persiste em localStorage (MVP). No prod, sync com /api/wallet, /api/friends, /api/gifts.
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import type { Gift, GiftKind } from "./social";
 
 export type CartLine = { productId: string; qty: number };
 
@@ -42,6 +43,21 @@ export type WalletState = {
   checkout: (total: number) => void;
   toggleBrandFollow: (brandId: string) => void;
   isFollowingBrand: (brandId: string) => boolean;
+
+  // social
+  friends: string[];                // usernames aceitos
+  friendRequestsIn: string[];       // pediram pra ti
+  friendRequestsOut: string[];      // você pediu
+  giftsReceived: Gift[];
+  giftsSent: Gift[];
+
+  addFriend: (username: string) => void;
+  acceptFriend: (username: string) => void;
+  rejectFriend: (username: string) => void;
+  removeFriend: (username: string) => void;
+  sendGift: (gift: Omit<Gift, "id" | "createdAt" | "status" | "from">) => void;
+  claimGift: (giftId: string) => Gift | null;
+  pendingGiftCount: () => number;
 };
 
 export const useWallet = create<WalletState>()(
@@ -167,6 +183,98 @@ export const useWallet = create<WalletState>()(
         })),
 
       isFollowingBrand: (brandId) => get().brandFollows.includes(brandId),
+
+      // ── Social ──
+      // Pré-popula com 3 amigos pra demo + 2 gifts recebidos
+      friends: ["bia", "rafa", "anacarol"],
+      friendRequestsIn: ["joao_alfa"],
+      friendRequestsOut: [],
+      giftsReceived: [
+        {
+          id: "gift_demo1",
+          from: "bia",
+          to: "voce",
+          kind: "coins",
+          coinsAmount: 50,
+          message: "Pra você não parar de assistir 💕",
+          createdAt: new Date(Date.now() - 86400000).toISOString(),
+          status: "pending",
+        },
+        {
+          id: "gift_demo2",
+          from: "rafa",
+          to: "voce",
+          kind: "episode",
+          seriesSlug: "noiva-cativa-da-mafia",
+          episodeNumber: 4,
+          message: "PRECISA ver esse cliffhanger",
+          createdAt: new Date(Date.now() - 3600000).toISOString(),
+          status: "pending",
+        },
+      ],
+      giftsSent: [],
+
+      addFriend: (username) =>
+        set((s) => {
+          if (s.friends.includes(username) || s.friendRequestsOut.includes(username))
+            return {};
+          return { friendRequestsOut: [...s.friendRequestsOut, username] };
+        }),
+
+      acceptFriend: (username) =>
+        set((s) => ({
+          friends: [...s.friends, username],
+          friendRequestsIn: s.friendRequestsIn.filter((u) => u !== username),
+        })),
+
+      rejectFriend: (username) =>
+        set((s) => ({
+          friendRequestsIn: s.friendRequestsIn.filter((u) => u !== username),
+        })),
+
+      removeFriend: (username) =>
+        set((s) => ({ friends: s.friends.filter((u) => u !== username) })),
+
+      sendGift: (g) =>
+        set((s) => ({
+          giftsSent: [
+            {
+              id: "gift_" + Math.random().toString(36).slice(2, 9),
+              from: "voce",
+              createdAt: new Date().toISOString(),
+              status: "pending" as const,
+              ...g,
+            },
+            ...s.giftsSent,
+          ],
+        })),
+
+      claimGift: (giftId) => {
+        const s = get();
+        const gift = s.giftsReceived.find((g) => g.id === giftId);
+        if (!gift || gift.status !== "pending") return null;
+        // aplica o presente
+        if (gift.kind === "coins" && gift.coinsAmount) {
+          set({ coinsBonus: s.coinsBonus + gift.coinsAmount });
+        } else if (gift.kind === "vip" && gift.vipDays) {
+          const expires = new Date(Date.now() + gift.vipDays * 86400000).toISOString();
+          set({ isVip: true, vipExpiresAt: expires });
+        } else if (gift.kind === "episode" && gift.seriesSlug && gift.episodeNumber) {
+          // desbloqueia o ep (precisa do id da série; usa slug como fallback)
+          set({ unlocks: [...s.unlocks, `${gift.seriesSlug}:${gift.episodeNumber}`] });
+        }
+        set({
+          giftsReceived: s.giftsReceived.map((g) =>
+            g.id === giftId
+              ? { ...g, status: "claimed" as const, claimedAt: new Date().toISOString() }
+              : g
+          ),
+        });
+        return gift;
+      },
+
+      pendingGiftCount: () =>
+        get().giftsReceived.filter((g) => g.status === "pending").length,
     }),
     { name: "vertiplay-wallet" }
   )

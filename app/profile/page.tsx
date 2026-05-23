@@ -17,6 +17,8 @@ import {
   LogOut,
   Coins,
   LogIn,
+  Users,
+  Gift,
 } from "lucide-react";
 
 export default function ProfilePage() {
@@ -30,6 +32,8 @@ export default function ProfilePage() {
 
   const saved = SERIES.filter((s) => watchlist.includes(s.id));
   const followedBrands = BRANDS.filter((b) => brandFollows.includes(b.id));
+  const friends = useWallet((s) => s.friends);
+  const pendingGifts = useWallet((s) => s.pendingGiftCount());
 
   const userName = session?.user?.name ?? "Convidado";
   const userEmail = session?.user?.email ?? "Não logado";
@@ -75,6 +79,35 @@ export default function ProfilePage() {
               Entrar
             </Link>
           )}
+        </div>
+
+        {/* Social: Amigos + Presentes */}
+        <div className="grid grid-cols-2 gap-2 mt-3">
+          <Link
+            href="/friends"
+            className="vp-card rounded-2xl p-3 flex items-center gap-2"
+          >
+            <Users className="w-5 h-5 text-[var(--color-vp-pink)]" />
+            <div className="flex-1">
+              <p className="text-xs text-white/55">Amigos</p>
+              <p className="font-bold text-sm">{friends.length}</p>
+            </div>
+          </Link>
+          <Link
+            href="/gifts"
+            className="vp-card rounded-2xl p-3 flex items-center gap-2 relative"
+          >
+            <Gift className="w-5 h-5 text-[var(--color-vp-pink)]" />
+            <div className="flex-1">
+              <p className="text-xs text-white/55">Presentes</p>
+              <p className="font-bold text-sm">{pendingGifts > 0 ? `${pendingGifts} pendentes` : "Inbox"}</p>
+            </div>
+            {pendingGifts > 0 && (
+              <span className="absolute top-2 right-2 vp-gradient text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center vp-glow">
+                {pendingGifts}
+              </span>
+            )}
+          </Link>
         </div>
 
         <Link

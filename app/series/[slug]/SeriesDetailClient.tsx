@@ -12,6 +12,7 @@ import {
   Lock,
   CheckCircle2,
   BadgeCheck,
+  Gift,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatViews, formatBRL, type Series } from "@/lib/catalog";
@@ -90,6 +91,13 @@ export function SeriesDetailClient({
             className="flex-1 vp-gradient py-3.5 rounded-2xl font-bold text-center flex items-center justify-center gap-2 vp-glow"
           >
             <Play className="w-5 h-5 fill-white" /> Assistir agora
+          </Link>
+          <Link
+            href={`/gifts/send?kind=series&payload=${encodeURIComponent(series.slug)}`}
+            className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center"
+            aria-label="Presentear"
+          >
+            <Gift className="w-5 h-5" />
           </Link>
           <button
             onClick={() => toggleWatchlist(series.id)}
