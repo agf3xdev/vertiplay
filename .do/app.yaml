@@ -2,6 +2,10 @@
 # Sobe direto do GitHub agf3xdev/vertiplay. Use `doctl apps create --spec .do/app.yaml`.
 name: vertiplay
 region: nyc
+domains:
+  - domain: vertiplay.diogoarchanjo.com.br
+    type: PRIMARY
+    zone: diogoarchanjo.com.br
 services:
   - name: web
     github:

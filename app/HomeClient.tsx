@@ -8,6 +8,7 @@ import Image from "next/image";
 import { Search, Flame, Crown, Sparkles, ChevronRight, Play } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { CoinBadge } from "@/components/CoinBadge";
+import { StoryBanner } from "@/components/StoryBanner";
 import { formatViews, type Series } from "@/lib/catalog";
 import { cn } from "@/lib/cn";
 
@@ -108,6 +109,9 @@ export function HomeClient({
           </div>
         </Link>
       )}
+
+      {/* Banner UGC — Conte sua história */}
+      <StoryBanner />
 
       {/* Row: Exclusivos */}
       <Section title="Exclusivos Vertiplay" icon={Crown} href="/browse?cat=exclusivo">

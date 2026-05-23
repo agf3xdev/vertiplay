@@ -234,6 +234,21 @@ model Order {
   items       OrderItem[]
 }
 
+// Histórias enviadas pelos usuários — pipeline de roteiros UGC
+model StorySubmission {
+  id          String   @id @default(cuid())
+  authorName  String
+  email       String?
+  phone       String?
+  title       String
+  genre       String?  // sugestão do gênero
+  synopsis    String   // resumo da história
+  inspiration String?  // baseada em fato real? em livro? autoral?
+  consent     Boolean  @default(false) // permissão pra usar
+  status      String   @default("pending") // pending | reviewing | approved | rejected
+  createdAt   DateTime @default(now())
+}
+
 model OrderItem {
   id         String   @id @default(cuid())
   orderId    String
