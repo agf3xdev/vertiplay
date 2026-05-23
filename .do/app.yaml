@@ -1,11 +1,9 @@
-# DigitalOcean App Platform — spec do Vertiplay
-# Sobe direto do GitHub agf3xdev/vertiplay. Use `doctl apps create --spec .do/app.yaml`.
+# Vertiplay — DigitalOcean App Platform
+# Sobe direto do GitHub agf3xdev/vertiplay.
+# Domínio custom (vertiplay.diogoarchanjo.com.br) é adicionado em segundo passo,
+# depois que o CNAME estiver propagando no Registro.br.
 name: vertiplay
 region: nyc
-domains:
-  - domain: vertiplay.diogoarchanjo.com.br
-    type: PRIMARY
-    zone: diogoarchanjo.com.br
 services:
   - name: web
     github:
@@ -13,29 +11,15 @@ services:
       branch: main
       deploy_on_push: true
     dockerfile_path: Dockerfile
-    instance_size_slug: basic-xxs
+    instance_size_slug: apps-s-1vcpu-0.5gb
     instance_count: 1
     http_port: 3030
     health_check:
       http_path: /api/health
+      initial_delay_seconds: 30
+      period_seconds: 15
     envs:
       - { key: NODE_ENV, value: production }
       - { key: NEXT_PUBLIC_APP_NAME, value: Vertiplay }
-      - { key: NEXT_PUBLIC_APP_URL, value: "${APP_URL}" }
-      - { key: DATABASE_URL, value: "${db.DATABASE_URL}", scope: RUN_TIME }
-      - { key: STRIPE_SECRET_KEY, type: SECRET, scope: RUN_TIME }
-      - { key: STRIPE_WEBHOOK_SECRET, type: SECRET, scope: RUN_TIME }
-      - { key: MERCADOPAGO_ACCESS_TOKEN, type: SECRET, scope: RUN_TIME }
-      - { key: R2_ACCOUNT_ID, type: SECRET, scope: RUN_TIME }
-      - { key: R2_ACCESS_KEY_ID, type: SECRET, scope: RUN_TIME }
-      - { key: R2_SECRET_ACCESS_KEY, type: SECRET, scope: RUN_TIME }
-      - { key: R2_BUCKET, value: vertiplay-videos }
-      - { key: NEXTAUTH_SECRET, type: SECRET, scope: RUN_TIME }
-      - { key: GOOGLE_CLIENT_ID, type: SECRET, scope: RUN_TIME }
-      - { key: GOOGLE_CLIENT_SECRET, type: SECRET, scope: RUN_TIME }
-
-databases:
-  - name: db
-    engine: PG
-    production: false
-    size: db-s-dev-database
+      - { key: NEXT_PUBLIC_APP_URL, value: "https://vertiplay.diogoarchanjo.com.br" }
+      - { key: NEXT_TELEMETRY_DISABLED, value: "1" }
