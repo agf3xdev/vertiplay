@@ -33,19 +33,70 @@ export type Product = {
   appearances: { seriesId: string; episode?: number; sceneNote?: string }[];
 };
 
-const img = (q: string) =>
-  `https://images.unsplash.com/${q}?auto=format&fit=crop&w=900&q=80`;
-
-const logo = (q: string) =>
-  `https://images.unsplash.com/${q}?auto=format&fit=crop&w=300&q=80`;
+// Imagens via geradores SVG locais (/api/brand-logo, /api/brand-cover, /api/product-img)
+// Independente de fontes externas, sempre carrega, on-brand
+const logo = (slug: string) => `/api/brand-logo/${slug}`;
+const cover = (slug: string) => `/api/brand-cover/${slug}`;
+const img = (id: string) => `/api/product-img/${id}`;
 
 export const BRANDS: Brand[] = [
+  // ═══════════════ MARCAS REAIS PARCEIRAS ═══════════════
+  {
+    id: "br1",
+    slug: "primus-rio",
+    name: "Primus Rio",
+    logoUrl: logo("primus-rio"),
+    coverUrl: cover("primus-rio"),
+    bio:
+      "Utilidades para o lar e brinquedos no atacado e varejo. Frete grátis Sul/Sudeste/Centro-Oeste acima de R$ 150. Direto do Rio pra sua casa.",
+    website: "https://primusrio.plataformaneo.com.br",
+    category: "Casa & Lar",
+    isVerified: true,
+  },
+  {
+    id: "br2",
+    slug: "mui",
+    name: "MUI",
+    logoUrl: logo("mui"),
+    coverUrl: cover("mui"),
+    bio:
+      "Moda feminina contemporânea. Peças autorais em linho, bordados artesanais e estética coastal. Coleções Lua e Maresia.",
+    website: "https://www.usemui.com.br",
+    category: "Moda",
+    isVerified: true,
+  },
+  {
+    id: "br3",
+    slug: "o-amigao",
+    name: "O Amigão",
+    logoUrl: logo("o-amigao"),
+    coverUrl: cover("o-amigao"),
+    bio:
+      "Supermercado nascido no Rio em 1997. 41 lojas, mais de 9 mil produtos. O bairro com preço de atacado.",
+    website: "https://oamigao.com.br",
+    category: "Supermercado",
+    isVerified: true,
+  },
+  {
+    id: "br4",
+    slug: "tubarao-atacadao",
+    name: "Tubarão Atacadão",
+    logoUrl: logo("tubarao-atacadao"),
+    coverUrl: cover("tubarao-atacadao"),
+    bio:
+      "Atacarejo carioca. 13 megastores no RJ + 2 em MG. +50 mil itens — utilidades, eletro, ferramentas, decoração. Preço de atacado mesmo levando 1 só.",
+    website: "https://www.tubaraoatacadao.com.br",
+    category: "Atacado",
+    isVerified: true,
+  },
+
+  // ═══════════════ MARCAS PARCEIRAS NARRATIVAS ═══════════════
   {
     id: "b1",
     slug: "atelie-bela",
     name: "Ateliê Bela",
-    logoUrl: logo("photo-1469334031218-e382a71b716b"),
-    coverUrl: img("photo-1490481651871-ab68de25d43d"),
+    logoUrl: logo("atelie-bela"),
+    coverUrl: cover("atelie-bela"),
     bio: "Vestidos sob medida feitos no Rio de Janeiro. Cada peça conta uma história.",
     website: "https://ateliebela.com.br",
     category: "Moda",
@@ -55,8 +106,8 @@ export const BRANDS: Brand[] = [
     id: "b2",
     slug: "casa-norte",
     name: "Casa Norte",
-    logoUrl: logo("photo-1556228453-efd6c1ff04f6"),
-    coverUrl: img("photo-1555041469-a586c61ea9bc"),
+    logoUrl: logo("casa-norte"),
+    coverUrl: cover("casa-norte"),
     bio: "Móveis autorais e ambientação cinematográfica. Decoração com personalidade.",
     website: "https://casanorte.com.br",
     category: "Casa",
@@ -66,8 +117,8 @@ export const BRANDS: Brand[] = [
     id: "b3",
     slug: "fervor-perfumaria",
     name: "Fervor Perfumaria",
-    logoUrl: logo("photo-1541643600914-78b084683601"),
-    coverUrl: img("photo-1592945403244-b3fbafd7f539"),
+    logoUrl: logo("fervor-perfumaria"),
+    coverUrl: cover("fervor-perfumaria"),
     bio: "Perfumes artesanais brasileiros. Notas de cinema, paixão e drama.",
     website: "https://fervor.com.br",
     category: "Beleza",
@@ -77,8 +128,8 @@ export const BRANDS: Brand[] = [
     id: "b4",
     slug: "dominio-relogios",
     name: "Domínio Relógios",
-    logoUrl: logo("photo-1523275335684-37898b6baf30"),
-    coverUrl: img("photo-1542496658-e33a6d0d50f6"),
+    logoUrl: logo("dominio-relogios"),
+    coverUrl: cover("dominio-relogios"),
     bio: "Relógios para quem comanda o tempo. Edições limitadas e suíças.",
     website: "https://dominio.com.br",
     category: "Joias",
@@ -88,8 +139,8 @@ export const BRANDS: Brand[] = [
     id: "b5",
     slug: "luminaria-casa",
     name: "Luminária Casa",
-    logoUrl: logo("photo-1565814329452-e1efa11c5b89"),
-    coverUrl: img("photo-1513506003901-1e6a229e2d15"),
+    logoUrl: logo("luminaria-casa"),
+    coverUrl: cover("luminaria-casa"),
     bio: "Iluminação cinematográfica para a sua casa virar set de novela.",
     website: "https://luminariacasa.com.br",
     category: "Casa",
@@ -99,8 +150,8 @@ export const BRANDS: Brand[] = [
     id: "b6",
     slug: "joalheria-tropical",
     name: "Joalheria Tropical",
-    logoUrl: logo("photo-1543294001-f7cd5d7fb516"),
-    coverUrl: img("photo-1599643478518-a784e5dc4c8f"),
+    logoUrl: logo("joalheria-tropical"),
+    coverUrl: cover("joalheria-tropical"),
     bio: "Ouro 18k, pedras brasileiras. As joias que aparecem nos closes mais marcantes.",
     website: "https://tropicaljoias.com.br",
     category: "Joias",
@@ -110,8 +161,8 @@ export const BRANDS: Brand[] = [
     id: "b7",
     slug: "eletro-prime",
     name: "Eletro Prime",
-    logoUrl: logo("photo-1581092334651-ddf26d9a09d0"),
-    coverUrl: img("photo-1556909114-f6e7ad7d3136"),
+    logoUrl: logo("eletro-prime"),
+    coverUrl: cover("eletro-prime"),
     bio: "Eletrodomésticos premium. A geladeira que aparece na cozinha da Helena.",
     website: "https://eletroprime.com.br",
     category: "Eletro",

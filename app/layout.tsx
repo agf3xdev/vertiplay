@@ -9,11 +9,19 @@ export const metadata: Metadata = {
     "Vertiplay é o app de mini-novelas verticais. Episódios de 60-90s, paixão, drama e reviravoltas — assista de qualquer lugar.",
   applicationName: "Vertiplay",
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/icon.svg",
+    shortcut: "/icon.svg",
+  },
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Vertiplay" },
   openGraph: {
     title: "Vertiplay",
     description: "Mini-novelas verticais. Drama em 60 segundos.",
     type: "website",
+    images: [{ url: "/logo.svg", width: 320, height: 110, alt: "Vertiplay" }],
   },
 };
 
