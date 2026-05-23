@@ -1,0 +1,248 @@
+// Vertiplay — schema do banco
+// Modelo de coins inspirado em DramaBox/ReelShort:
+//   coinsPaid (compradas) + coinsBonus (rewards/check-in) — consumidas nessa ordem.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  avatarUrl     String?
+  coinsPaid     Int      @default(0)
+  coinsBonus    Int      @default(50) // bônus de boas-vindas
+  isVip         Boolean  @default(false)
+  vipExpiresAt  DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  unlocks       Unlock[]
+  watchlist     Watchlist[]
+  checkins      Checkin[]
+  transactions  Transaction[]
+  progress      WatchProgress[]
+}
+
+model Series {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  title         String
+  synopsis      String
+  posterUrl     String
+  bannerUrl     String?
+  genre         String   // "Amor Proibido" | "Lobisomem" | "Vingança" | "CEO" | "Identidade Oculta" | etc
+  tags          String   // CSV: bilionario,alfa,vinganca
+  language      String   @default("pt-BR")
+  isDubbed      Boolean  @default(true)
+  views         Int      @default(0)
+  rating        Float    @default(0)
+  totalEpisodes Int      @default(0)
+  freeEpisodes  Int      @default(3) // primeiros N grátis (estilo ReelShort)
+  isFeatured    Boolean  @default(false)
+  isExclusive   Boolean  @default(false)
+  releaseAt     DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  episodes      Episode[]
+  watchlist     Watchlist[]
+}
+
+model Episode {
+  id          String   @id @default(cuid())
+  seriesId    String
+  number      Int
+  title       String
+  durationSec Int
+  videoUrl    String   // HLS .m3u8 ou MP4
+  thumbUrl    String
+  costCoins   Int      @default(20)
+  isFree      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  series      Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  unlocks     Unlock[]
+  progress    WatchProgress[]
+
+  @@unique([seriesId, number])
+}
+
+model Unlock {
+  id         String   @id @default(cuid())
+  userId     String
+  episodeId  String
+  coinsSpent Int
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  episode    Episode  @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, episodeId])
+}
+
+model Watchlist {
+  id        String   @id @default(cuid())
+  userId    String
+  seriesId  String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  series    Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, seriesId])
+}
+
+model WatchProgress {
+  id         String   @id @default(cuid())
+  userId     String
+  episodeId  String
+  positionSec Int      @default(0)
+  completed  Boolean  @default(false)
+  updatedAt  DateTime @updatedAt
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  episode    Episode  @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, episodeId])
+}
+
+model Checkin {
+  id        String   @id @default(cuid())
+  userId    String
+  day       String   // YYYY-MM-DD
+  reward    Int
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, day])
+}
+
+model Transaction {
+  id         String   @id @default(cuid())
+  userId     String
+  kind       String   // "purchase" | "unlock" | "checkin" | "bonus" | "vip" | "shop"
+  coinsPaid  Int      @default(0)
+  coinsBonus Int      @default(0)
+  amountBRL  Int      @default(0) // centavos
+  note       String?
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ──────────────────────────────────────────────────────────────
+// SHOP LAYER — marcas patrocinadoras, catálogo por série, carrinho
+// Diferencial Vertiplay: shoppable drama (estilo "ver na cena → comprar").
+// ──────────────────────────────────────────────────────────────
+
+model Brand {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  logoUrl     String
+  coverUrl    String?
+  bio         String
+  website     String?
+  category    String   // "Moda" | "Casa" | "Beleza" | "Eletro" | "Joias" | ...
+  isVerified  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  products    Product[]
+  sponsorships SeriesSponsorship[]
+}
+
+model Product {
+  id            String   @id @default(cuid())
+  brandId       String
+  slug          String   @unique
+  name          String
+  description   String
+  imageUrl      String
+  gallery       String   // CSV de URLs extras
+  priceBRL      Int      // centavos
+  oldPriceBRL   Int?     // centavos (riscado)
+  currency      String   @default("BRL")
+  category      String   // "Vestido" | "Sofá" | "Perfume" | "Relógio" | ...
+  stock         Int      @default(50)
+  rating        Float    @default(4.7)
+  affiliateUrl  String?  // link externo opcional
+  createdAt     DateTime @default(now())
+
+  brand         Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  appearances   ProductAppearance[]
+  cartItems     CartItem[]
+  orderItems    OrderItem[]
+}
+
+// "Tal produto aparece na série X, episódio Y" — alimenta a sacolinha do player
+model ProductAppearance {
+  id         String   @id @default(cuid())
+  productId  String
+  seriesId   String
+  episodeId  String?  // opcional (NULL = aparece em vários eps)
+  sceneNote  String?  // ex: "Vestido da Helena no jantar"
+  timestampSec Int?
+  createdAt  DateTime @default(now())
+
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+// Patrocínio de uma marca em uma série (briefing comercial)
+model SeriesSponsorship {
+  id         String   @id @default(cuid())
+  brandId    String
+  seriesId   String
+  tier       String   @default("standard") // "headline" | "standard"
+  startAt    DateTime @default(now())
+  endAt      DateTime?
+  createdAt  DateTime @default(now())
+
+  brand      Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@unique([brandId, seriesId])
+}
+
+model CartItem {
+  id         String   @id @default(cuid())
+  userId     String
+  productId  String
+  qty        Int      @default(1)
+  createdAt  DateTime @default(now())
+
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+model Order {
+  id          String   @id @default(cuid())
+  userId      String
+  totalBRL    Int
+  status      String   @default("pending") // "pending" | "paid" | "shipped" | "delivered"
+  paymentRef  String?  // ID Stripe/MercadoPago
+  addressJson String?  // JSON
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items       OrderItem[]
+}
+
+model OrderItem {
+  id         String   @id @default(cuid())
+  orderId    String
+  productId  String
+  qty        Int
+  unitPriceBRL Int
+  brandSlug  String   // snapshot
+  productName String  // snapshot
+
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [productId], references: [id])
+}

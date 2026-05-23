@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+@theme {
+  --color-vp-bg: #0a0612;
+  --color-vp-bg-2: #15091f;
+  --color-vp-ink: #ffffff;
+  --color-vp-ink-dim: #b8b3c4;
+  --color-vp-pink: #ff2e92;
+  --color-vp-violet: #7c3aed;
+  --color-vp-blue: #2563eb;
+  --color-vp-gold: #ffd166;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", "Inter", sans-serif;
+}
+
+html, body {
+  background: var(--color-vp-bg);
+  color: var(--color-vp-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+button { font-family: inherit; }
+
+/* Gradient utilities */
+.vp-gradient {
+  background: linear-gradient(135deg, var(--color-vp-pink) 0%, var(--color-vp-violet) 60%, var(--color-vp-blue) 100%);
+}
+.vp-gradient-text {
+  background: linear-gradient(135deg, var(--color-vp-pink), var(--color-vp-violet) 70%, var(--color-vp-blue));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.vp-glow {
+  box-shadow: 0 0 30px rgba(255, 46, 146, 0.35), 0 0 60px rgba(124, 58, 237, 0.25);
+}
+.vp-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
+}
+
+/* Snap feed */
+.snap-feed {
+  scroll-snap-type: y mandatory;
+  overflow-y: scroll;
+  height: 100dvh;
+  scrollbar-width: none;
+}
+.snap-feed::-webkit-scrollbar { display: none; }
+.snap-item {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  height: 100dvh;
+  width: 100%;
+  position: relative;
+}
+
+/* Safe areas (iOS notch) */
+.safe-top { padding-top: env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+/* Mobile-only container — bloqueia o app a tipo "frame" no desktop */
+.mobile-frame {
+  width: 100%;
+  max-width: 480px;
+  margin-inline: auto;
+  min-height: 100dvh;
+  position: relative;
+  overflow: hidden;
+  background: var(--color-vp-bg);
+}
+
+/* Shimmer p/ skeletons */
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,.04) 0%, rgba(255,255,255,.10) 50%, rgba(255,255,255,.04) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Aspect ratio helpers */
+.aspect-poster { aspect-ratio: 2 / 3; }
+.aspect-vertical { aspect-ratio: 9 / 16; }
+
+/* Hide scrollbars but keep scroll */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }

@@ -1,0 +1,26 @@
+# Compose alternativo — para subir num Droplet DigitalOcean
+version: "3.9"
+services:
+  vertiplay:
+    build: .
+    container_name: vertiplay
+    restart: unless-stopped
+    ports:
+      - "3030:3030"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://vertiplay:vertiplay@db:5432/vertiplay
+    depends_on:
+      - db
+  db:
+    image: postgres:16-alpine
+    container_name: vertiplay-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vertiplay
+      POSTGRES_PASSWORD: vertiplay
+      POSTGRES_DB: vertiplay
+    volumes:
+      - vertiplay-db:/var/lib/postgresql/data
+volumes:
+  vertiplay-db:
