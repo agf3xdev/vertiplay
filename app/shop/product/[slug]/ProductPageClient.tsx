@@ -103,9 +103,9 @@ export function ProductPageClient({
                   <Link
                     key={s.id}
                     href={`/series/${s.slug}`}
-                    className="shrink-0 w-32 vp-card rounded-xl overflow-hidden"
+                    className="shrink-0 w-28 sm:w-32 vp-card rounded-xl overflow-hidden"
                   >
-                    <div className="relative w-32 h-20">
+                    <div className="relative w-28 sm:w-32 h-20">
                       <Image src={s.bannerUrl || s.posterUrl} alt={s.title} fill className="object-cover" unoptimized />
                     </div>
                     <div className="p-2">

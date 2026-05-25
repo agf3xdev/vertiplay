@@ -71,7 +71,7 @@ export default function RewardsPage() {
           </span>
         </div>
 
-        <div className="grid grid-cols-7 gap-1.5 mb-4">
+        <div className="grid grid-cols-7 gap-1 sm:gap-1.5 mb-4">
           {DAILY_REWARDS.map((r, i) => {
             const isToday = i + 1 === currentDay;
             const claimed = i + 1 < currentDay || (checkedToday && i + 1 === currentDay);

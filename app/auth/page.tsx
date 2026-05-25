@@ -67,7 +67,7 @@ function AuthInner() {
   }
 
   return (
-    <div className="min-h-[100dvh] flex flex-col px-6 pt-12 safe-top">
+    <div className="min-h-[100dvh] flex flex-col px-4 sm:px-6 pt-12 safe-top">
       {mode !== "choose" && (
         <button
           onClick={() => { setMode(mode === "email-code" ? "email-input" : "choose"); setErr(null); }}
@@ -81,7 +81,7 @@ function AuthInner() {
         <Logo size={56} />
         {mode === "choose" && (
           <>
-            <h1 className="text-3xl font-extrabold mt-6">Bem-vindo ao Vertiplay</h1>
+            <h1 className="text-2xl sm:text-3xl font-extrabold mt-6">Bem-vindo ao Vertiplay</h1>
             <p className="text-white/65 text-sm mt-2">
               Mini-novelas verticais, 60 segundos por episódio. Drama, paixão, reviravolta.
             </p>
@@ -89,7 +89,7 @@ function AuthInner() {
         )}
         {mode === "email-input" && (
           <>
-            <h1 className="text-3xl font-extrabold mt-6">Entrar com email</h1>
+            <h1 className="text-2xl sm:text-3xl font-extrabold mt-6">Entrar com email</h1>
             <p className="text-white/65 text-sm mt-2">
               Vamos enviar um código de 6 dígitos pra você.
             </p>
@@ -97,7 +97,7 @@ function AuthInner() {
         )}
         {mode === "email-code" && (
           <>
-            <h1 className="text-3xl font-extrabold mt-6">Veja seu email</h1>
+            <h1 className="text-2xl sm:text-3xl font-extrabold mt-6">Veja seu email</h1>
             <p className="text-white/65 text-sm mt-2">
               Enviamos um código de 6 dígitos pra <b className="text-white">{email}</b>
             </p>

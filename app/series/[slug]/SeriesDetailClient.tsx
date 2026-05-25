@@ -66,7 +66,7 @@ export function SeriesDetailClient({
               Exclusivo Vertiplay
             </span>
           )}
-          <h1 className="text-3xl font-extrabold leading-tight">{series.title}</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight">{series.title}</h1>
           <div className="flex items-center gap-3 mt-2 text-xs text-white/85">
             <span className="flex items-center gap-1">
               <Star className="w-3 h-3 fill-[var(--color-vp-gold)] text-[var(--color-vp-gold)]" />
@@ -146,7 +146,7 @@ export function SeriesDetailClient({
 
         {/* Tab content */}
         {tab === "episodios" && (
-          <div className="grid grid-cols-4 gap-2 mt-4 pb-6">
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mt-4 pb-6">
             {series.episodes.map((ep) => {
               const unlocked = ep.isFree || isVip || isUnlocked(series.id, ep.number);
               return (

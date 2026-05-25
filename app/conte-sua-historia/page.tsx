@@ -123,7 +123,7 @@ export default function StoryFormPage() {
 
       <div className="px-4 -mt-3">
         {/* Benefícios */}
-        <div className="grid grid-cols-3 gap-2 mb-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-5">
           <Perk icon={Crown} label="500 coins se aprovada" />
           <Perk icon={Pencil} label="Crédito como roteirista" />
           <Perk icon={Heart} label="Você inspira outras pessoas" />

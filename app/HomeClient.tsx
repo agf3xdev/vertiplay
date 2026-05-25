@@ -125,7 +125,7 @@ export function HomeClient({
 
       {/* Grid: catalog */}
       <Section title={tab === "Para Você" ? "Descobrir" : tab} icon={Sparkles}>
-        <div className="grid grid-cols-3 gap-2 px-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 px-4">
           {list.map((s) => (
             <PosterCard key={s.id} series={s} />
           ))}
