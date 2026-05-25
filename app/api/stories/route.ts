@@ -2,9 +2,9 @@
 // No MVP, persiste em arquivo local. Em prod, troca por Prisma (StorySubmission).
 
 import { promises as fs } from "node:fs";
-import { join } from "node:path";
+import { dataPath } from "@/lib/data-dir";
 
-const STORE = join(process.cwd(), "prisma", "stories.json");
+const storePath = () => dataPath("stories.json");
 
 type Submission = {
   id: string;
@@ -22,7 +22,7 @@ type Submission = {
 
 async function readAll(): Promise<Submission[]> {
   try {
-    const raw = await fs.readFile(STORE, "utf8");
+    const raw = await fs.readFile(await storePath(), "utf8");
     return JSON.parse(raw);
   } catch {
     return [];
@@ -30,8 +30,7 @@ async function readAll(): Promise<Submission[]> {
 }
 
 async function writeAll(list: Submission[]) {
-  await fs.mkdir(join(process.cwd(), "prisma"), { recursive: true });
-  await fs.writeFile(STORE, JSON.stringify(list, null, 2), "utf8");
+  await fs.writeFile(await storePath(), JSON.stringify(list, null, 2), "utf8");
 }
 
 export async function POST(req: Request) {

@@ -6,8 +6,8 @@
 
 import { Resend } from "resend";
 import { promises as fs } from "node:fs";
-import { join } from "node:path";
 import { createHash, randomInt } from "node:crypto";
+import { dataPath } from "./data-dir";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = process.env.EMAIL_FROM || "Vertiplay <vertiplay@diogoarchanjo.com.br>";
@@ -20,12 +20,7 @@ function resend(): Resend {
   return _resend;
 }
 
-// Em prod (DO App Platform) o /app é writable mas efêmero — codes expiram
-// em 10min então tudo bem perder no redeploy. Usa /tmp como fallback caso
-// a writes em /app/prisma falhem por permissão (Docker).
-const CODES_FILE = process.env.EMAIL_CODES_FILE
-  || join(process.cwd(), "prisma", "email-codes.json");
-const CODES_FALLBACK = "/tmp/vertiplay-email-codes.json";
+const codesPath = () => dataPath("email-codes.json");
 
 type CodeEntry = {
   email: string;
@@ -35,23 +30,14 @@ type CodeEntry = {
 };
 
 async function loadCodes(): Promise<CodeEntry[]> {
-  for (const path of [CODES_FILE, CODES_FALLBACK]) {
-    try {
-      return JSON.parse(await fs.readFile(path, "utf8"));
-    } catch { /* keep trying */ }
+  try {
+    return JSON.parse(await fs.readFile(await codesPath(), "utf8"));
+  } catch {
+    return [];
   }
-  return [];
 }
 async function saveCodes(arr: CodeEntry[]) {
-  const data = JSON.stringify(arr, null, 2);
-  try {
-    await fs.mkdir(join(CODES_FILE, ".."), { recursive: true });
-    await fs.writeFile(CODES_FILE, data);
-    return;
-  } catch (e) {
-    console.warn("[email] write to", CODES_FILE, "failed, fallback to /tmp:", (e as any)?.message);
-  }
-  await fs.writeFile(CODES_FALLBACK, data);
+  await fs.writeFile(await codesPath(), JSON.stringify(arr, null, 2));
 }
 function hash(s: string) {
   return createHash("sha256").update(s).digest("hex");

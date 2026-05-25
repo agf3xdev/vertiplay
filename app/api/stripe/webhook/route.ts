@@ -4,23 +4,23 @@
 
 import { NextRequest } from "next/server";
 import { promises as fs } from "node:fs";
-import { join } from "node:path";
 import { stripe, STRIPE_WEBHOOK_SECRET } from "@/lib/stripe";
+import { dataPath } from "@/lib/data-dir";
 import type Stripe from "stripe";
 
 export const runtime = "nodejs";
 
-const LEDGER = join(process.cwd(), "prisma", "ledger.json");
+const ledgerPath = () => dataPath("ledger.json");
 
 async function appendLedger(entry: any) {
+  const file = await ledgerPath();
   let arr: any[] = [];
   try {
-    const raw = await fs.readFile(LEDGER, "utf8");
+    const raw = await fs.readFile(file, "utf8");
     arr = JSON.parse(raw);
   } catch {}
   arr.unshift({ ...entry, at: new Date().toISOString() });
-  await fs.mkdir(join(process.cwd(), "prisma"), { recursive: true });
-  await fs.writeFile(LEDGER, JSON.stringify(arr.slice(0, 1000), null, 2));
+  await fs.writeFile(file, JSON.stringify(arr.slice(0, 1000), null, 2));
 }
 
 export async function POST(req: NextRequest) {

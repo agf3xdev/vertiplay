@@ -7,11 +7,10 @@
 //   { id, from, to, status: "pending"|"accepted", createdAt }
 
 import { promises as fs } from "node:fs";
-import { join } from "node:path";
+import { dataPath } from "./data-dir";
 
-const DIR = join(process.cwd(), "prisma");
-const USERS_FILE = join(DIR, "users.json");
-const FRIENDS_FILE = join(DIR, "friendships.json");
+const USERS_FILE = () => dataPath("users.json");
+const FRIENDS_FILE = () => dataPath("friendships.json");
 
 export type StoredUser = {
   username: string;
@@ -31,21 +30,16 @@ export type Friendship = {
   createdAt: string;
 };
 
-async function ensureDir() {
-  await fs.mkdir(DIR, { recursive: true });
-}
-
-async function readJSON<T>(path: string, fallback: T): Promise<T> {
+async function readJSON<T>(getPath: () => Promise<string>, fallback: T): Promise<T> {
   try {
-    return JSON.parse(await fs.readFile(path, "utf8"));
+    return JSON.parse(await fs.readFile(await getPath(), "utf8"));
   } catch {
     return fallback;
   }
 }
 
-async function writeJSON(path: string, data: unknown) {
-  await ensureDir();
-  await fs.writeFile(path, JSON.stringify(data, null, 2));
+async function writeJSON(getPath: () => Promise<string>, data: unknown) {
+  await fs.writeFile(await getPath(), JSON.stringify(data, null, 2));
 }
 
 export function slugifyUsername(input: string): string {
