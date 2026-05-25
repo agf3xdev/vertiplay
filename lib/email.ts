@@ -20,7 +20,12 @@ function resend(): Resend {
   return _resend;
 }
 
-const CODES_FILE = join(process.cwd(), "prisma", "email-codes.json");
+// Em prod (DO App Platform) o /app é writable mas efêmero — codes expiram
+// em 10min então tudo bem perder no redeploy. Usa /tmp como fallback caso
+// a writes em /app/prisma falhem por permissão (Docker).
+const CODES_FILE = process.env.EMAIL_CODES_FILE
+  || join(process.cwd(), "prisma", "email-codes.json");
+const CODES_FALLBACK = "/tmp/vertiplay-email-codes.json";
 
 type CodeEntry = {
   email: string;
@@ -30,15 +35,23 @@ type CodeEntry = {
 };
 
 async function loadCodes(): Promise<CodeEntry[]> {
-  try {
-    return JSON.parse(await fs.readFile(CODES_FILE, "utf8"));
-  } catch {
-    return [];
+  for (const path of [CODES_FILE, CODES_FALLBACK]) {
+    try {
+      return JSON.parse(await fs.readFile(path, "utf8"));
+    } catch { /* keep trying */ }
   }
+  return [];
 }
 async function saveCodes(arr: CodeEntry[]) {
-  await fs.mkdir(join(process.cwd(), "prisma"), { recursive: true });
-  await fs.writeFile(CODES_FILE, JSON.stringify(arr, null, 2));
+  const data = JSON.stringify(arr, null, 2);
+  try {
+    await fs.mkdir(join(CODES_FILE, ".."), { recursive: true });
+    await fs.writeFile(CODES_FILE, data);
+    return;
+  } catch (e) {
+    console.warn("[email] write to", CODES_FILE, "failed, fallback to /tmp:", (e as any)?.message);
+  }
+  await fs.writeFile(CODES_FALLBACK, data);
 }
 function hash(s: string) {
   return createHash("sha256").update(s).digest("hex");
@@ -64,15 +77,21 @@ export async function sendOtpEmail(email: string): Promise<{ ok: boolean; error?
   await saveCodes(all.slice(0, 500)); // safety cap
 
   try {
-    await resend().emails.send({
+    const r = await resend().emails.send({
       from: FROM_EMAIL,
       to: email,
       subject: `Seu código Vertiplay: ${code}`,
       html: renderHtml(code),
       text: `Seu código de acesso ao Vertiplay é: ${code}\n\nExpira em 10 minutos. Se você não pediu esse código, ignore esta mensagem.`,
     });
+    if ((r as any)?.error) {
+      const err = (r as any).error;
+      console.error("[email] resend api error:", err);
+      return { ok: false, error: err.message || JSON.stringify(err) };
+    }
     return { ok: true };
   } catch (e: any) {
+    console.error("[email] send threw:", e?.message, e);
     return { ok: false, error: e?.message ?? "Falha ao enviar email" };
   }
 }
