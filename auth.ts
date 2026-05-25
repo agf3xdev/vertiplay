@@ -9,11 +9,13 @@ import { upsertUser, findUserByEmail } from "@/lib/social-store";
 import { verifyOtp } from "@/lib/email";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  useSecureCookies: true,
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       authorization: { params: { prompt: "select_account" } },
+      checks: ["state"],
     }),
     // Login por email via código OTP
     Credentials({
