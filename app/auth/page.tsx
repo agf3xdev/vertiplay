@@ -135,8 +135,8 @@ function AuthInner() {
           </button>
           <p className="text-[10px] text-white/45 text-center mt-4">
             Ao continuar, você concorda com os{" "}
-            <span className="underline">Termos</span> e a{" "}
-            <span className="underline">Política de Privacidade</span>.
+            <a href="/termos" className="underline">Termos</a> e a{" "}
+            <a href="/privacidade" className="underline">Política de Privacidade</a>.
           </p>
         </div>
       )}
