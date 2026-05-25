@@ -15,11 +15,13 @@ const config: CapacitorConfig = {
   },
   android: {
     backgroundColor: "#0a0612",
+    appendUserAgent: "VertiplayApp/1.0",
   },
   ios: {
     backgroundColor: "#0a0612",
     contentInset: "always",
     scrollEnabled: true,
+    appendUserAgent: "VertiplayApp/1.0",
   },
 };
 
