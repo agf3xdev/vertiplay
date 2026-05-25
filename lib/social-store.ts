@@ -1,16 +1,7 @@
-// Persistência server-side de usuários e amizades em arquivos JSON (MVP).
-// Em prod migrar pra Prisma (User, Friendship).
-//
-// users.json:
-//   { username, displayName, email, avatarUrl, bio?, createdAt, lastSeenAt }
-// friendships.json:
-//   { id, from, to, status: "pending"|"accepted", createdAt }
+// Users e amizades — Postgres via Prisma.
+// API exportada igual à versão anterior (JSON-based) pra callers não quebrarem.
 
-import { promises as fs } from "node:fs";
-import { dataPath } from "./data-dir";
-
-const USERS_FILE = () => dataPath("users.json");
-const FRIENDS_FILE = () => dataPath("friendships.json");
+import { prisma } from "./prisma";
 
 export type StoredUser = {
   username: string;
@@ -30,18 +21,6 @@ export type Friendship = {
   createdAt: string;
 };
 
-async function readJSON<T>(getPath: () => Promise<string>, fallback: T): Promise<T> {
-  try {
-    return JSON.parse(await fs.readFile(await getPath(), "utf8"));
-  } catch {
-    return fallback;
-  }
-}
-
-async function writeJSON(getPath: () => Promise<string>, data: unknown) {
-  await fs.writeFile(await getPath(), JSON.stringify(data, null, 2));
-}
-
 export function slugifyUsername(input: string): string {
   return input
     .toLowerCase()
@@ -51,10 +30,23 @@ export function slugifyUsername(input: string): string {
     .slice(0, 24) || "user";
 }
 
+function toStoredUser(u: any): StoredUser {
+  return {
+    username: u.username,
+    displayName: u.displayName || u.name || u.email.split("@")[0],
+    email: u.email,
+    avatarUrl: u.avatarUrl ?? undefined,
+    bio: u.bio ?? undefined,
+    createdAt: (u.createdAt instanceof Date ? u.createdAt : new Date(u.createdAt)).toISOString(),
+    lastSeenAt: (u.lastSeenAt instanceof Date ? u.lastSeenAt : new Date(u.lastSeenAt ?? u.createdAt)).toISOString(),
+  };
+}
+
 // ────────────── USERS ──────────────
 
 export async function getAllUsers(): Promise<StoredUser[]> {
-  return readJSON<StoredUser[]>(USERS_FILE, []);
+  const rows = await prisma.user.findMany({ orderBy: { createdAt: "desc" } });
+  return rows.map(toStoredUser);
 }
 
 export async function upsertUser(input: {
@@ -62,67 +54,87 @@ export async function upsertUser(input: {
   displayName: string;
   avatarUrl?: string;
 }): Promise<StoredUser> {
-  const all = await getAllUsers();
-  const now = new Date().toISOString();
-  const existing = all.find((u) => u.email.toLowerCase() === input.email.toLowerCase());
+  const email = input.email.toLowerCase();
+  const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
-    existing.displayName = input.displayName;
-    existing.avatarUrl = input.avatarUrl ?? existing.avatarUrl;
-    existing.lastSeenAt = now;
-    await writeJSON(USERS_FILE, all);
-    return existing;
+    const updated = await prisma.user.update({
+      where: { email },
+      data: {
+        displayName: input.displayName || existing.displayName,
+        avatarUrl: input.avatarUrl ?? existing.avatarUrl,
+        lastSeenAt: new Date(),
+      },
+    });
+    return toStoredUser(updated);
   }
-  // gera username único a partir do email/displayname
-  let base = slugifyUsername(input.email.split("@")[0]);
+  // gera username único
+  const base = slugifyUsername(email.split("@")[0]);
   let username = base;
   let n = 1;
-  while (all.some((u) => u.username === username)) {
+  while (await prisma.user.findUnique({ where: { username } })) {
     n++;
     username = `${base}${n}`;
   }
-  const user: StoredUser = {
-    username,
-    displayName: input.displayName,
-    email: input.email,
-    avatarUrl: input.avatarUrl,
-    createdAt: now,
-    lastSeenAt: now,
-  };
-  all.unshift(user);
-  await writeJSON(USERS_FILE, all);
-  return user;
+  const created = await prisma.user.create({
+    data: {
+      username,
+      displayName: input.displayName || email.split("@")[0],
+      email,
+      avatarUrl: input.avatarUrl,
+    },
+  });
+  return toStoredUser(created);
 }
 
 export async function findUserByEmail(email: string): Promise<StoredUser | undefined> {
-  const all = await getAllUsers();
-  return all.find((u) => u.email.toLowerCase() === email.toLowerCase());
+  const u = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+  return u ? toStoredUser(u) : undefined;
 }
 
 export async function findUserByUsername(username: string): Promise<StoredUser | undefined> {
-  const all = await getAllUsers();
-  return all.find((u) => u.username.toLowerCase() === username.toLowerCase());
+  const u = await prisma.user.findUnique({ where: { username: username.toLowerCase() } });
+  return u ? toStoredUser(u) : undefined;
 }
 
 export async function searchUsersDB(q: string, excludeEmail?: string): Promise<StoredUser[]> {
-  const all = await getAllUsers();
   const term = q.toLowerCase().replace(/^@/, "").trim();
-  return all
-    .filter((u) => excludeEmail ? u.email.toLowerCase() !== excludeEmail.toLowerCase() : true)
-    .filter((u) => {
-      if (!term) return true;
-      return (
-        u.username.toLowerCase().includes(term) ||
-        u.displayName.toLowerCase().includes(term) ||
-        u.email.toLowerCase().includes(term)
-      );
-    })
-    .slice(0, 50);
+  const where: any = {};
+  if (excludeEmail) where.email = { not: excludeEmail.toLowerCase() };
+  if (term) {
+    where.OR = [
+      { username: { contains: term, mode: "insensitive" } },
+      { displayName: { contains: term, mode: "insensitive" } },
+      { email: { contains: term, mode: "insensitive" } },
+    ];
+  }
+  const rows = await prisma.user.findMany({ where, take: 50, orderBy: { lastSeenAt: "desc" } });
+  return rows.map(toStoredUser);
 }
 
 // ────────────── FRIENDSHIPS ──────────────
+// Internamente Prisma armazena por User.id; API externa continua usando username.
+
+async function usernameToId(username: string): Promise<string | null> {
+  const u = await prisma.user.findUnique({ where: { username: username.toLowerCase() }, select: { id: true } });
+  return u?.id ?? null;
+}
+
+async function idToUsername(id: string): Promise<string | null> {
+  const u = await prisma.user.findUnique({ where: { id }, select: { username: true } });
+  return u?.username ?? null;
+}
 
 export async function getAllFriendships(): Promise<Friendship[]> {
-  return readJSON<Friendship[]>(FRIENDS_FILE, []);
+  const rows = await prisma.friendship.findMany({
+    include: { from: { select: { username: true } }, to: { select: { username: true } } },
+  });
+  return rows.map((r) => ({
+    id: r.id,
+    from: r.from.username,
+    to: r.to.username,
+    status: r.status as "pending" | "accepted",
+    createdAt: r.createdAt.toISOString(),
+  }));
 }
 
 export async function listFriendsFor(username: string): Promise<{
@@ -130,17 +142,23 @@ export async function listFriendsFor(username: string): Promise<{
   requestsIn: string[];
   requestsOut: string[];
 }> {
-  const all = await getAllFriendships();
+  const userId = await usernameToId(username);
+  if (!userId) return { friends: [], requestsIn: [], requestsOut: [] };
+
+  const rows = await prisma.friendship.findMany({
+    where: { OR: [{ fromId: userId }, { toId: userId }] },
+    include: { from: { select: { username: true } }, to: { select: { username: true } } },
+  });
+
   const friends: string[] = [];
   const requestsIn: string[] = [];
   const requestsOut: string[] = [];
-  for (const f of all) {
+  for (const f of rows) {
     if (f.status === "accepted") {
-      if (f.from === username) friends.push(f.to);
-      else if (f.to === username) friends.push(f.from);
+      friends.push(f.fromId === userId ? f.to.username : f.from.username);
     } else if (f.status === "pending") {
-      if (f.from === username) requestsOut.push(f.to);
-      else if (f.to === username) requestsIn.push(f.from);
+      if (f.fromId === userId) requestsOut.push(f.to.username);
+      else requestsIn.push(f.from.username);
     }
   }
   return { friends, requestsIn, requestsOut };
@@ -148,61 +166,66 @@ export async function listFriendsFor(username: string): Promise<{
 
 export async function requestFriendship(from: string, to: string): Promise<{ ok: boolean; reason?: string }> {
   if (from === to) return { ok: false, reason: "Você não pode adicionar você mesmo" };
-  const all = await getAllFriendships();
-  // já existe relação?
-  const existing = all.find(
-    (f) =>
-      (f.from === from && f.to === to) ||
-      (f.from === to && f.to === from)
-  );
+  const [fromId, toId] = await Promise.all([usernameToId(from), usernameToId(to)]);
+  if (!fromId || !toId) return { ok: false, reason: "Usuário não encontrado" };
+
+  const existing = await prisma.friendship.findFirst({
+    where: {
+      OR: [
+        { fromId, toId },
+        { fromId: toId, toId: fromId },
+      ],
+    },
+  });
   if (existing) {
     if (existing.status === "accepted") return { ok: false, reason: "Já são amigos" };
-    if (existing.from === to) {
-      // o outro já tinha pedido; aceita
-      existing.status = "accepted";
-      await writeJSON(FRIENDS_FILE, all);
+    if (existing.fromId === toId) {
+      // o outro já pediu; aceita
+      await prisma.friendship.update({
+        where: { id: existing.id },
+        data: { status: "accepted" },
+      });
       return { ok: true };
     }
     return { ok: false, reason: "Pedido pendente" };
   }
-  all.unshift({
-    id: "fs_" + Math.random().toString(36).slice(2, 10),
-    from,
-    to,
-    status: "pending",
-    createdAt: new Date().toISOString(),
+  await prisma.friendship.create({
+    data: { fromId, toId, status: "pending" },
   });
-  await writeJSON(FRIENDS_FILE, all);
   return { ok: true };
 }
 
 export async function acceptFriendship(from: string, me: string): Promise<boolean> {
-  const all = await getAllFriendships();
-  const f = all.find((x) => x.from === from && x.to === me && x.status === "pending");
+  const [fromId, meId] = await Promise.all([usernameToId(from), usernameToId(me)]);
+  if (!fromId || !meId) return false;
+  const f = await prisma.friendship.findFirst({
+    where: { fromId, toId: meId, status: "pending" },
+  });
   if (!f) return false;
-  f.status = "accepted";
-  await writeJSON(FRIENDS_FILE, all);
+  await prisma.friendship.update({ where: { id: f.id }, data: { status: "accepted" } });
   return true;
 }
 
 export async function rejectFriendship(from: string, me: string): Promise<boolean> {
-  const all = await getAllFriendships();
-  const idx = all.findIndex((x) => x.from === from && x.to === me && x.status === "pending");
-  if (idx < 0) return false;
-  all.splice(idx, 1);
-  await writeJSON(FRIENDS_FILE, all);
-  return true;
+  const [fromId, meId] = await Promise.all([usernameToId(from), usernameToId(me)]);
+  if (!fromId || !meId) return false;
+  const r = await prisma.friendship.deleteMany({
+    where: { fromId, toId: meId, status: "pending" },
+  });
+  return r.count > 0;
 }
 
 export async function removeFriendship(a: string, b: string): Promise<boolean> {
-  const all = await getAllFriendships();
-  const idx = all.findIndex(
-    (f) =>
-      f.status === "accepted" &&
-      ((f.from === a && f.to === b) || (f.from === b && f.to === a))
-  );
-  if (idx < 0) return false;
-  all.splice(idx, 1);
-  await writeJSON(FRIENDS_FILE, all);
-  return true;
+  const [aId, bId] = await Promise.all([usernameToId(a), usernameToId(b)]);
+  if (!aId || !bId) return false;
+  const r = await prisma.friendship.deleteMany({
+    where: {
+      status: "accepted",
+      OR: [
+        { fromId: aId, toId: bId },
+        { fromId: bId, toId: aId },
+      ],
+    },
+  });
+  return r.count > 0;
 }

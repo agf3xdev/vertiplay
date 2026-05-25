@@ -1,6 +1,7 @@
 // POST /api/friends/request { to: "<username>" }
 import { auth } from "@/auth";
 import { findUserByEmail, findUserByUsername, requestFriendship } from "@/lib/social-store";
+import { sendFriendRequestEmail } from "@/lib/email";
 
 export const runtime = "nodejs";
 
@@ -18,5 +19,13 @@ export async function POST(req: Request) {
 
   const r = await requestFriendship(me.username, target.username);
   if (!r.ok) return Response.json({ error: r.reason }, { status: 400 });
+
+  // Notifica destinatário por email (fire-and-forget, não bloqueia resposta)
+  sendFriendRequestEmail({
+    to: target.email,
+    fromDisplayName: me.displayName || me.username,
+    fromUsername: me.username,
+  }).catch((e) => console.error("[friends/request] notification:", e?.message));
+
   return Response.json({ ok: true });
 }

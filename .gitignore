@@ -17,3 +17,4 @@ prisma/users.json
 prisma/friendships.json
 prisma/email-codes.json
 android/keystore/
+tsconfig.tsbuildinfo

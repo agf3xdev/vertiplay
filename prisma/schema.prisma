@@ -7,27 +7,80 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
   id            String   @id @default(cuid())
+  username      String   @unique  // @arroba pública pra busca/amigos
+  displayName   String   @default("")
   email         String   @unique
   name          String?
   avatarUrl     String?
+  bio           String?
   coinsPaid     Int      @default(0)
   coinsBonus    Int      @default(50) // bônus de boas-vindas
   isVip         Boolean  @default(false)
   vipExpiresAt  DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  lastSeenAt    DateTime @default(now())
 
   unlocks       Unlock[]
   watchlist     Watchlist[]
   checkins      Checkin[]
   transactions  Transaction[]
   progress      WatchProgress[]
+  friendsFrom   Friendship[] @relation("FriendshipFrom")
+  friendsTo     Friendship[] @relation("FriendshipTo")
+}
+
+// Pedidos/amizades entre users — pending até accept.
+model Friendship {
+  id        String   @id @default(cuid())
+  fromId    String
+  toId      String
+  status    String   @default("pending") // "pending" | "accepted"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  from      User     @relation("FriendshipFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  to        User     @relation("FriendshipTo", fields: [toId], references: [id], onDelete: Cascade)
+
+  @@unique([fromId, toId])
+  @@index([status])
+}
+
+// Códigos OTP de login por email — TTL 10min, max 5 tentativas.
+model OtpCode {
+  id         String   @id @default(cuid())
+  email      String
+  codeHash   String   // SHA-256 do código (não armazenar plain)
+  expiresAt  DateTime
+  attempts   Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@unique([email]) // 1 código ativo por email (upsert)
+  @@index([expiresAt])
+}
+
+// Ledger de eventos de pagamento (Stripe + Mercado Pago).
+model LedgerEntry {
+  id         String   @id @default(cuid())
+  source     String   // "stripe" | "mp"
+  type       String   // "payment" | "ignored" | "error" | "signature_invalid"
+  paymentId  String?
+  status     String?
+  amount     Float?
+  method     String?
+  userId     String?
+  kind       String?
+  meta       Json?
+  at         DateTime @default(now())
+
+  @@index([source, at])
+  @@index([paymentId])
 }
 
 model Series {

@@ -25,4 +25,7 @@ COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/prisma ./prisma
 USER nextjs
 EXPOSE 3030
-CMD ["npx", "next", "start", "-p", "3030"]
+# Boot: aplica schema Prisma no Postgres (idempotente) + sobe Next.js.
+# db push é seguro pra MVP — se schema mudar, cria/altera tabelas; se já
+# bater, no-op. Quando migrarmos pra "prisma migrate deploy" trocamos aqui.
+CMD ["sh", "-c", "npx prisma db push --accept-data-loss --skip-generate && exec npx next start -p 3030"]

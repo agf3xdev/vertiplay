@@ -4,13 +4,10 @@
 
 import { NextRequest } from "next/server";
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { promises as fs } from "node:fs";
 import { mpPayment, MP_WEBHOOK_SECRET } from "@/lib/mercadopago";
-import { dataPath } from "@/lib/data-dir";
+import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
-
-const ledgerPath = () => dataPath("ledger.json");
 
 // Valida x-signature do Mercado Pago.
 // Template: id:<dataId>;request-id:<reqId>;ts:<ts>;
@@ -40,15 +37,33 @@ function verifyMpSignature(req: NextRequest, dataId: string): boolean {
   }
 }
 
-async function appendLedger(entry: any) {
-  const file = await ledgerPath();
-  let arr: any[] = [];
+async function appendLedger(entry: {
+  type: string;
+  paymentId?: string | number;
+  status?: string;
+  amount?: number;
+  method?: string;
+  userId?: string;
+  kind?: string;
+  meta?: Record<string, any>;
+}) {
   try {
-    const raw = await fs.readFile(file, "utf8");
-    arr = JSON.parse(raw);
-  } catch {}
-  arr.unshift({ ...entry, at: new Date().toISOString() });
-  await fs.writeFile(file, JSON.stringify(arr.slice(0, 1000), null, 2));
+    await prisma.ledgerEntry.create({
+      data: {
+        source: "mp",
+        type: entry.type,
+        paymentId: entry.paymentId != null ? String(entry.paymentId) : undefined,
+        status: entry.status,
+        amount: entry.amount,
+        method: entry.method,
+        userId: entry.userId,
+        kind: entry.kind,
+        meta: entry.meta as any,
+      },
+    });
+  } catch (e: any) {
+    console.error("[mp/webhook] ledger write failed:", e?.message);
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -59,7 +74,7 @@ export async function POST(req: NextRequest) {
 
     if (topic === "payment" && id) {
       if (!verifyMpSignature(req, String(id))) {
-        await appendLedger({ type: "mp.signature_invalid", id });
+        await appendLedger({ type: "signature_invalid", paymentId: id });
         return Response.json({ error: "assinatura inválida" }, { status: 401 });
       }
       const payment = await mpPayment().get({ id: String(id) });
@@ -81,21 +96,23 @@ export async function POST(req: NextRequest) {
       //   if kind === "coins": creditar coins + bonus no User (Prisma)
       //   if kind === "vip":   ativar VIP por N dias
     } else {
-      await appendLedger({ type: "mp.ignored", topic, raw: body });
+      await appendLedger({ type: "ignored", meta: { topic, raw: body } });
     }
 
     return Response.json({ received: true });
   } catch (e: any) {
-    await appendLedger({ type: "mp.error", error: e?.message });
-    // MP retenta se status != 200, então retornamos 200 sempre que possível
+    await appendLedger({ type: "error", meta: { error: e?.message } });
     return Response.json({ received: true, soft_error: e?.message }, { status: 200 });
   }
 }
 
-// GET tb pode chegar (legacy notifications)
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const id = url.searchParams.get("data.id") ?? url.searchParams.get("id");
-  await appendLedger({ type: "mp.get", id, qs: Object.fromEntries(url.searchParams) });
+  await appendLedger({
+    type: "get",
+    paymentId: id ?? undefined,
+    meta: Object.fromEntries(url.searchParams),
+  });
   return Response.json({ received: true });
 }

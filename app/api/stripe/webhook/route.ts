@@ -3,24 +3,39 @@
 // No MVP, persiste em arquivo local. Em prod, atualiza User via Prisma.
 
 import { NextRequest } from "next/server";
-import { promises as fs } from "node:fs";
 import { stripe, STRIPE_WEBHOOK_SECRET } from "@/lib/stripe";
-import { dataPath } from "@/lib/data-dir";
+import { prisma } from "@/lib/prisma";
 import type Stripe from "stripe";
 
 export const runtime = "nodejs";
 
-const ledgerPath = () => dataPath("ledger.json");
-
-async function appendLedger(entry: any) {
-  const file = await ledgerPath();
-  let arr: any[] = [];
+async function appendLedger(entry: {
+  type: string;
+  paymentId?: string;
+  status?: string;
+  amount?: number;
+  method?: string;
+  userId?: string;
+  kind?: string;
+  meta?: Record<string, any>;
+}) {
   try {
-    const raw = await fs.readFile(file, "utf8");
-    arr = JSON.parse(raw);
-  } catch {}
-  arr.unshift({ ...entry, at: new Date().toISOString() });
-  await fs.writeFile(file, JSON.stringify(arr.slice(0, 1000), null, 2));
+    await prisma.ledgerEntry.create({
+      data: {
+        source: "stripe",
+        type: entry.type,
+        paymentId: entry.paymentId,
+        status: entry.status,
+        amount: entry.amount,
+        method: entry.method,
+        userId: entry.userId,
+        kind: entry.kind,
+        meta: entry.meta as any,
+      },
+    });
+  } catch (e: any) {
+    console.error("[stripe/webhook] ledger write failed:", e?.message);
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -44,30 +59,29 @@ export async function POST(req: NextRequest) {
       const md = session.metadata ?? {};
       await appendLedger({
         type: "checkout.completed",
-        sessionId: session.id,
+        paymentId: session.id,
         userId: md.userId,
         kind: md.kind,
-        amount: session.amount_total,
-        currency: session.currency,
-        meta: md,
+        amount: session.amount_total ?? undefined,
+        meta: { ...md, currency: session.currency },
       });
-      // TODO: credit user (Prisma): se kind=coins, +coins +bonus; se kind=vip, ativar VIP por N dias
+      // TODO: credit user: se kind=coins, +coins +bonus; se kind=vip, ativar VIP por N dias
       break;
     }
     case "payment_intent.succeeded": {
       const pi = event.data.object as Stripe.PaymentIntent;
-      await appendLedger({ type: "payment.succeeded", paymentIntent: pi.id, amount: pi.amount });
+      await appendLedger({ type: "payment.succeeded", paymentId: pi.id, amount: pi.amount });
       break;
     }
     case "customer.subscription.created":
     case "customer.subscription.updated":
     case "customer.subscription.deleted": {
       const sub = event.data.object as Stripe.Subscription;
-      await appendLedger({ type: event.type, subscriptionId: sub.id, status: sub.status });
+      await appendLedger({ type: event.type, paymentId: sub.id, status: sub.status });
       break;
     }
     default:
-      await appendLedger({ type: "ignored", evt: event.type });
+      await appendLedger({ type: "ignored", meta: { evt: event.type } });
   }
 
   return Response.json({ received: true });
