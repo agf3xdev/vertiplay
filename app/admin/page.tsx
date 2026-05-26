@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { PageHeader, StatCard, Card, Badge } from "@/components/admin/ui";
+import { SeedDemoButton } from "@/components/admin/SeedDemoButton";
 import Link from "next/link";
 import { ScrollText, ChevronRight } from "lucide-react";
 
@@ -104,8 +105,10 @@ export default async function AdminDashboard() {
           )}
         </Card>
 
-        <Card>
-          <h2 className="font-bold mb-3">Atalhos</h2>
+        <div className="space-y-4">
+          <SeedDemoButton />
+          <Card>
+            <h2 className="font-bold mb-3">Atalhos</h2>
           <div className="grid grid-cols-2 gap-2">
             <Link href="/admin/series/new" className="px-3 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-sm font-medium text-center">
               + Nova série
@@ -120,7 +123,8 @@ export default async function AdminDashboard() {
               + Nova campanha
             </Link>
           </div>
-        </Card>
+          </Card>
+        </div>
       </div>
     </div>
   );
