@@ -29,6 +29,8 @@ const config: CapacitorConfig = {
     contentInset: "always",
     scrollEnabled: true,
   },
+  // Config do SocialLogin é feita em runtime em lib/native-auth.ts
+  // (capacitor.config.ts é processado em build-time e não resolve process.env).
 };
 
 export default config;

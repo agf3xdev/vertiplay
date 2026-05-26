@@ -5,8 +5,11 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
+import { OAuth2Client } from "google-auth-library";
 import { upsertUser, findUserByEmail } from "@/lib/social-store";
 import { verifyOtp } from "@/lib/email";
+
+const googleClient = new OAuth2Client();
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   useSecureCookies: true,
@@ -16,6 +19,41 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       authorization: { params: { prompt: "select_account" } },
       checks: ["state"],
+    }),
+    // Google Sign-In nativo (Capacitor) — recebe idToken do plugin nativo
+    Credentials({
+      id: "google-native",
+      name: "Google (native)",
+      credentials: { idToken: { type: "text" } },
+      async authorize(credentials) {
+        const idToken = String(credentials?.idToken ?? "");
+        if (!idToken) return null;
+        const audiences = [
+          process.env.GOOGLE_CLIENT_ID,
+          process.env.GOOGLE_IOS_CLIENT_ID,
+          process.env.GOOGLE_ANDROID_CLIENT_ID,
+        ].filter(Boolean) as string[];
+        try {
+          const ticket = await googleClient.verifyIdToken({ idToken, audience: audiences });
+          const payload = ticket.getPayload();
+          const email = payload?.email?.toLowerCase();
+          if (!email || !payload?.email_verified) return null;
+          const user = await upsertUser({
+            email,
+            displayName: payload.name ?? email.split("@")[0],
+            avatarUrl: payload.picture,
+          });
+          return {
+            id: user.username,
+            email: user.email,
+            name: user.displayName,
+            image: user.avatarUrl,
+          };
+        } catch (e) {
+          console.error("[auth] google-native verifyIdToken failed:", (e as Error).message);
+          return null;
+        }
+      },
     }),
     // Login por email via código OTP
     Credentials({
