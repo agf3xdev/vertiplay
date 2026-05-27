@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 // Estratégia: PWA via WebView (Capacitor). O app nativo carrega a URL
-// produção https://vertiplay.diogoarchanjo.com.br — todas as updates de
+// produção https://mvp.vertiplay.com.br — todas as updates de
 // produto não precisam rebuild do APK/IPA, é só deploy no DO.
 
 const config: CapacitorConfig = {
@@ -9,7 +9,7 @@ const config: CapacitorConfig = {
   appName: "Vertiplay",
   webDir: "public",
   server: {
-    url: "https://vertiplay.diogoarchanjo.com.br",
+    url: "https://mvp.vertiplay.com.br",
     cleartext: false,
     androidScheme: "https",
     // Mantém OAuth do Google dentro do WebView (não abre browser externo,
