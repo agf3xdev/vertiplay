@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/cn";
+import { Logo } from "@/components/Logo";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -57,9 +58,10 @@ export function AdminShell({
           open ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
       >
-        <div className="px-5 pt-5 pb-3 flex items-center justify-between">
-          <Link href="/admin" className="font-extrabold text-lg vp-gradient-text">
-            Vertiplay Admin
+        <div className="px-5 pt-5 pb-4 flex items-center justify-between">
+          <Link href="/admin" className="flex items-center gap-2">
+            <Logo size={28} />
+            <span className="text-[10px] uppercase tracking-[0.18em] text-white/55 font-semibold">Admin</span>
           </Link>
           <button
             onClick={() => setOpen(false)}
@@ -110,7 +112,10 @@ export function AdminShell({
           >
             <Menu className="w-4 h-4" />
           </button>
-          <span className="font-bold vp-gradient-text">Vertiplay Admin</span>
+          <Link href="/admin" className="flex items-center gap-2">
+            <Logo size={22} />
+            <span className="text-[9px] uppercase tracking-[0.18em] text-white/55 font-semibold">Admin</span>
+          </Link>
         </header>
         <main className="flex-1 px-4 sm:px-6 lg:px-10 py-6 lg:py-10">{children}</main>
       </div>
