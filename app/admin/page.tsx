@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { PageHeader, StatCard, Card, Badge } from "@/components/admin/ui";
 import { SeedDemoButton } from "@/components/admin/SeedDemoButton";
+import { SeedShopButton } from "@/components/admin/SeedShopButton";
 import Link from "next/link";
 import { ScrollText, ChevronRight } from "lucide-react";
 
@@ -106,6 +107,7 @@ export default async function AdminDashboard() {
         </Card>
 
         <div className="space-y-4">
+          <SeedShopButton />
           <SeedDemoButton />
           <Card>
             <h2 className="font-bold mb-3">Atalhos</h2>
