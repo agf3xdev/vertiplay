@@ -1,95 +1,122 @@
 # Vertiplay
 
-Mini-novelas verticais brasileiras. Inspirado em ReelShort e DramaBox, com um diferencial: **shop sponsored por série** — cada produção tem um catálogo de produtos que aparecem nas cenas (roupas, móveis, perfumes, eletro), patrocinados por marcas parceiras.
+> A Netflix de novelas verticais do Brasil — short drama BR-first com **shop shoppable**, sistema social e pipeline UGC. Inspirado em ReelShort/DramaBox, nascido em PT-BR.
+
+Produzido pela [F3X](https://github.com/agf3xdev) para Diogo Archanjo (CEO).
+
+- **Live:** https://mvp.vertiplay.com.br
+- **iOS:** TestFlight (Apple Dev: AGENCIA F3X CONSULTORIA)
+- **Android:** Play Console (Internal Testing, agência F3X Tech)
 
 ## Stack
 
-- **Next.js 16** (App Router, TypeScript, Tailwind v4) — mobile-first PWA
-- **Prisma + Postgres** (SQLite no MVP)
-- **HLS.js** para streaming vertical adaptativo
-- **Zustand** com persist para carteira, watchlist, carrinho
-- **Lucide** ícones
-
-## Mercado (2025 → 2026)
-
-- Short drama apps: **US$ 2,98 bi** IAP em 2025 (+115% YoY)
-- ReelShort: ~US$ 1,2 bi/ano · DramaBox: US$ 323M (2024)
-- ~70% do gasto global concentrado em ReelShort + DramaBox
-- Brasil: Globo lançou GloboPop, ReelShort estreou série BR (`A Vida Secreta do Meu Marido Bilionário`)
-
-## Como Vertiplay se diferencia
-
-| | ReelShort | DramaBox | **Vertiplay** |
-|---|---|---|---|
-| Player vertical | ✓ | ✓ | ✓ |
-| Coins + Bonus | ✓ | ✓ | ✓ |
-| Daily check-in | ✓ | ✓ | ✓ |
-| VIP/Subscription | ✓ | ✓ | ✓ |
-| Conteúdo BR-first | parcial | parcial | **✓ nativo** |
-| **Loja shoppable por série** | ✗ | ✗ | **✓** |
-| Marcas patrocinadoras com catálogo | ✗ | ✗ | **✓** |
+| Camada | Tech |
+|---|---|
+| **App web** | Next.js 15 (App Router), React 19, TypeScript 5, Tailwind v4 |
+| **Auth** | NextAuth v5 (Google OAuth + Email OTP via Resend + Google nativo Capacitor) |
+| **Banco** | Postgres Managed (DigitalOcean), Prisma 6 ORM |
+| **Pagamentos** | Stripe (cartão) + Mercado Pago (PIX/cartão/boleto) — **LIVE** |
+| **Vídeo** | HLS.js + MP4; produção planejada Cloudflare R2 |
+| **Estado client** | Zustand + persist localStorage |
+| **Mobile wrap** | Capacitor 8 (WebView que carrega `mvp.vertiplay.com.br`) |
+| **Hospedagem** | DigitalOcean App Platform (Docker) |
+| **Storage** | Cloudflare R2 (vídeos planejado), Unsplash CDN (placeholders) |
 
 ## Estrutura
 
 ```
-app/
-  page.tsx                Home com tabs (Para Você / Novo / Rankings / gêneros)
-  browse/                 Descobrir e busca
-  series/[slug]/          Detalhe da série (Episódios / Loja / Sobre)
-  watch/[slug]/[ep]/      Player vertical full-screen + paywall coins
-  shop/                   Hub da loja
-    brand/[slug]/         Página da marca patrocinadora
-    product/[slug]/       Detalhe do produto
-  cart/                   Carrinho
-  checkout/               Pagamento (Pix / Cartão)
-  wallet/                 Carteira (coins + VIP)
-  rewards/                Daily check-in + missões
-  profile/                Perfil + pedidos + lojas seguidas
-  api/                    health, catalog, shop
-
-components/
-  VerticalPlayer.tsx      Player HLS + paywall + side actions + ShopOverlay
-  ShopOverlay.tsx         Sacolinha "da cena" no player
-  BottomNav.tsx           Navegação inferior (5 tabs)
-  CoinBadge.tsx / CartButton.tsx / Logo.tsx
-
-lib/
-  catalog.ts              12 séries mock (gêneros e capas no estilo BR)
-  shop.ts                 7 marcas, 16 produtos vinculados às séries
-  store.ts                Zustand (wallet, watchlist, unlocks, cart, follows)
+vertiplay/
+├── app/                      # Next.js App Router
+│   ├── (rotas user-facing)   # /, /browse, /watch, /shop, /profile, /wallet...
+│   ├── admin/                # Painel administrativo (gated por allowlist)
+│   ├── api/                  # API routes
+│   └── auth/                 # Login (Google + Email OTP)
+├── components/               # UI components
+│   ├── admin/                # AdminShell, PageHeader, Table, etc
+│   ├── VerticalPlayer.tsx    # Player HLS estilo TikTok
+│   ├── BottomNav.tsx
+│   └── ShopOverlay.tsx       # Sacolinha shoppable durante o player
+├── lib/                      # Business logic
+│   ├── prisma.ts             # Singleton Prisma client
+│   ├── catalog.ts            # Catálogo in-memory (séries mock)
+│   ├── shop.ts               # Brands + Products in-memory (mock)
+│   ├── store.ts              # Zustand global (wallet/cart/social)
+│   ├── stripe.ts             # Stripe integration
+│   ├── mercadopago.ts        # MP integration
+│   ├── email.ts              # OTP via Resend
+│   ├── social-store.ts       # User upsert + amizades
+│   ├── admin.ts              # Gate por email allowlist
+│   └── admin-api.ts          # Helpers de admin endpoints
+├── prisma/
+│   └── schema.prisma         # 17 modelos (User, Series, Episode, Brand, ...)
+├── android/                  # Capacitor Android shell
+├── ios/                      # Capacitor iOS shell
+├── public/                   # Estáticos (logos, ícones)
+├── Dockerfile
+├── capacitor.config.ts
+└── docs/                     # ← Documentação completa
+    ├── ARCHITECTURE.md
+    ├── STACK.md
+    ├── DATA_MODEL.md
+    ├── AUTH.md
+    ├── PAYMENTS.md
+    ├── ROUTES.md
+    ├── API.md
+    ├── ADMIN.md
+    ├── NATIVE.md
+    ├── DEPLOY.md
+    └── ENVIRONMENT.md
 ```
 
-## Setup local
+## Quick start
 
 ```bash
 npm install
-cp .env.example .env
+# Configurar .env.local (ver docs/ENVIRONMENT.md)
 npx prisma db push
-npm run dev
-# http://localhost:3030
+npm run dev   # http://localhost:3030
 ```
 
-## Deploy
+## Scripts
 
-Targets **DigitalOcean**:
+| Comando | Função |
+|---|---|
+| `npm run dev` | Next dev em :3030 |
+| `npm run build` | Next build (gera `.next`) |
+| `npm start` | Next start em :3030 |
+| `npm run lint` | ESLint |
+| `npm run db:push` | Aplica schema Prisma no banco |
+| `npm run db:studio` | Prisma Studio (GUI do banco) |
 
-- **App Platform**: `doctl apps create --spec .do/app.yaml`
-- **Droplet com Docker**: `docker compose up -d --build`
+## Documentação
 
-Recursos auxiliares na DO:
-- **DO Spaces** para storage de vídeo (compatível S3, troca por R2 quando quiser)
-- **DO Managed Postgres** para o banco
-- **DO Container Registry** (opcional) para builds
+- **[Architecture](docs/ARCHITECTURE.md)** — visão sistêmica
+- **[Stack](docs/STACK.md)** — versões e deps explicadas
+- **[Data Model](docs/DATA_MODEL.md)** — 17 modelos Prisma
+- **[Auth](docs/AUTH.md)** — Google OAuth + Email OTP + Google nativo
+- **[Payments](docs/PAYMENTS.md)** — Stripe + MP fluxos completos
+- **[Routes](docs/ROUTES.md)** — todas as páginas user-facing
+- **[API](docs/API.md)** — 30+ endpoints documentados
+- **[Admin](docs/ADMIN.md)** — painel administrativo
+- **[Native](docs/NATIVE.md)** — iOS + Android Capacitor
+- **[Deploy](docs/DEPLOY.md)** — DigitalOcean + DNS + SSL
+- **[Environment](docs/ENVIRONMENT.md)** — todas as env vars
 
-## Próximos passos (pós-MVP)
+## Mercado
 
-1. NextAuth com Google/Apple
-2. Stripe + Mercado Pago Pix reais (webhooks)
-3. Encoder HLS (ffmpeg + S3/Spaces) e DRM
-4. Painel admin (upload de séries, episódios, briefing de patrocínio)
-5. CMS para marcas adicionarem produtos shoppable
-6. Push notifications (lançamentos, daily reminder)
-7. App nativo (React Native ou Capacitor com o mesmo backend)
-8. Analytics: GA4 + posthog + tracking por scene-item
+| | ReelShort | DramaBox | **Vertiplay** |
+|---|---|---|---|
+| Player vertical | ✓ | ✓ | ✓ |
+| Coins + VIP | ✓ | ✓ | ✓ |
+| Daily check-in | ✓ | ✓ | ✓ |
+| Conteúdo BR-first | dublado | dublado | **✓ nativo PT-BR** |
+| **Shop shoppable por série** | ✗ | ✗ | **✓** |
+| **Sistema social (amigos + gifts)** | ✗ | ✗ | **✓** |
+| **Pipeline UGC** | ✗ | ✗ | **✓** |
+| Pagamento PIX | ✗ | ✗ | **✓** |
 
-Made by **F3X**.
+Short drama global: **US$ 2,98 bi** IAP em 2025 (+115% YoY). ReelShort ~US$ 1,2 bi/ano. Globo lançou GloboPop = validação do mercado BR.
+
+## Licença
+
+Propriedade de Vertiplay. Código produzido pela F3X sob contrato. Não distribuir.
