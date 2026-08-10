@@ -112,6 +112,12 @@ export function HomeClient({
 
       {/* Banner UGC — Conte sua história */}
       <StoryBanner />
+      <Link
+        href="/roteiristas"
+        className="block mx-4 mt-2 text-center text-xs text-white/55 hover:text-white/80"
+      >
+        É roteirista profissional? <span className="vp-gradient-text font-semibold">Cadastre-se aqui →</span>
+      </Link>
 
       {/* Row: Exclusivos */}
       <Section title="Exclusivos Vertiplay" icon={Crown} href="/browse?cat=exclusivo">

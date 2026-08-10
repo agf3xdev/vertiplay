@@ -9,6 +9,7 @@ import {
   Tag,
   Megaphone,
   ScrollText,
+  Feather,
   Users,
   Wallet,
   LogOut,
@@ -26,6 +27,7 @@ const NAV = [
   { href: "/admin/products", label: "Produtos", icon: ShoppingBag },
   { href: "/admin/campaigns", label: "Campanhas", icon: Megaphone },
   { href: "/admin/stories", label: "Histórias UGC", icon: ScrollText },
+  { href: "/admin/writers", label: "Roteiristas", icon: Feather },
   { href: "/admin/users", label: "Usuários", icon: Users },
   { href: "/admin/ledger", label: "Ledger", icon: Wallet },
 ];

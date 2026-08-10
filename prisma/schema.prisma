@@ -302,6 +302,24 @@ model StorySubmission {
   createdAt   DateTime @default(now())
 }
 
+// Cadastro de roteiristas — recrutamento pra sala de roteiro do Vertiplay
+// (diferente do StorySubmission, que é UGC pontual de uma história).
+model WriterApplication {
+  id           String   @id @default(cuid())
+  name         String
+  email        String
+  phone        String?
+  portfolioUrl String?  // Wattpad, Instagram, site, PDF...
+  experience   String   // "iniciante" | "amador" | "profissional"
+  genres       String   // CSV: bilionario,lobisomem,vinganca
+  sample       String   // trecho de roteiro/sinopse de amostra ou link
+  motivation   String?  // por que quer escrever pro Vertiplay
+  availability String?  // ex: "1 roteiro por semana"
+  consent      Boolean  @default(false)
+  status       String   @default("pending") // pending | reviewing | approved | rejected
+  createdAt    DateTime @default(now())
+}
+
 model OrderItem {
   id         String   @id @default(cuid())
   orderId    String
