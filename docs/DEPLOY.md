@@ -15,7 +15,7 @@ Configuradas via `vercel env add` (a maioria como *Sensitive* — write-only, n�
 
 | Var | Origem |
 |---|---|
-| `DATABASE_URL` / `DIRECT_URL` | Supabase `vertiplay-us` (pooler + direto) |
+| `DATABASE_URL` / `DIRECT_URL` | Supabase `vertiplay-us` (pooler + direto). `DATABASE_URL` **precisa** de `?pgbouncer=true` — sem isso o Prisma quebra com `prepared statement already exists` no PgBouncer em transaction mode |
 | `NEXT_PUBLIC_APP_URL` / `NEXTAUTH_URL` | `https://mvp.vertiplay.com.br` |
 | `NEXT_PUBLIC_APP_NAME` | `Vertiplay` |
 | `ADMIN_EMAILS` | `agenciaf3xia@gmail.com,livoolivecommerce@gmail.com` |
@@ -50,7 +50,6 @@ vercel ls vertiplay                    # histórico de deployments
 - **Projeto:** `vertiplay-us` (ref `ezreisgjabvawlataugp`), região `us-east-1`, org `agenciaf3xia@gmail.com's Org`
 - **Prisma:** `DATABASE_URL` usa o pooler (porta 6543, transaction mode) pra runtime; `DIRECT_URL` usa porta 5432 pra `prisma db push`/migrations
 - Schema aplicado com `npx prisma db push` (sem migrations formais ainda — mesma filosofia MVP de antes)
-- ⚠️ Existe um segundo projeto Supabase órfão `vertiplay` (ref `lwhmalipdfzuhcspavyt`, região `sa-east-1`, vazio) — sobrou de uma tentativa anterior, não é usado. Pode ser apagado.
 
 ### Aplicar mudança de schema
 
