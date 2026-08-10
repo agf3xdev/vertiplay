@@ -15,12 +15,12 @@
 │       │      │ Capacitor 8 WebView (URL = produção)             │
 │       └──────┤                                                   │
 └──────────────┼──────────────────────────────────────────────────┘
-               │ HTTPS (Cloudflare → DO Edge)
+               │ HTTPS (Registro.br DNS → Vercel Edge)
                ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │              mvp.vertiplay.com.br                                │
-│              DigitalOcean App Platform                           │
-│              (Docker, Node 22-alpine, port 3030)                 │
+│              Vercel (livoo-projetos/vertiplay)                   │
+│              Next.js serverless functions                        │
 │                                                                  │
 │  ┌────────────────────────────────────────────────────────┐    │
 │  │              Next.js 15 (App Router)                    │    │
@@ -41,12 +41,12 @@
 │  └─────────┼───────────────────────────────────────────────┘    │
 │            │                                                     │
 └────────────┼─────────────────────────────────────────────────────┘
-             │ TCP/SSL (privado, attach DO)
+             │ TCP/SSL (pooler pgbouncer)
              ▼
        ┌──────────────────────────┐
-       │  Postgres Managed DO     │
-       │  cluster: vertiplay-db   │
-       │  NYC3, $15.15/mês        │
+       │  Supabase Postgres       │
+       │  projeto: vertiplay-us   │
+       │  us-east-1, free tier    │
        └──────────────────────────┘
 ```
 

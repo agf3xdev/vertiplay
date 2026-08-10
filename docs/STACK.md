@@ -21,8 +21,8 @@
 
 ## Banco
 - **Prisma 6.1.0** ORM + `@prisma/client`
-- **Postgres** (DigitalOcean Managed Database)
-- 17 modelos (ver `docs/DATA_MODEL.md`)
+- **Postgres** (Supabase Managed Database)
+- 19 modelos (ver `docs/DATA_MODEL.md`)
 
 ## Autenticação
 - **NextAuth v5.0.0-beta.25** (Auth.js)

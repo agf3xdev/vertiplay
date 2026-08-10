@@ -1,189 +1,101 @@
 # Deploy
 
-## DigitalOcean App Platform
+**Migrado de DigitalOcean pra Vercel em 2026-08-10** — a conta DO que hospedava o app foi perdida. Como era MVP sem usuário real pagando, subimos do zero em infra gerenciada, sem restore de dados.
 
-App ID: `bf466225-39f2-4102-bb5f-49dacd2436ca`
-- Region: NYC
-- Plan: `apps-s-1vcpu-0.5gb` (US$ 5/mês)
-- Source: `https://github.com/agf3xdev/vertiplay` branch `main`
-- Build: Docker (`Dockerfile`)
-- Port: 3030
+## Vercel
 
-### Spec
+- **Projeto:** `livoo-projetos/vertiplay` (conta `agenciaf3xia`, mesma da Ingoo/Amigão/Primus)
+- **Live:** https://mvp.vertiplay.com.br
+- **Git:** conectado a `github.com/agf3xdev/vertiplay` branch `main` — todo push faz deploy automático
+- **Framework:** detectado como Next.js (build `next build`, sem Dockerfile — removido junto com `.do/app.yaml` e `docker-compose.yml`, que eram só pro droplet DO)
 
-`.do/app.yaml`:
-```yaml
-name: vertiplay
-region: nyc
-services:
-  - name: web
-    git:
-      repo_clone_url: https://github.com/agf3xdev/vertiplay.git
-      branch: main
-    dockerfile_path: Dockerfile
-    instance_size_slug: apps-s-1vcpu-0.5gb
-    instance_count: 1
-    http_port: 3030
-    health_check:
-      http_path: /api/health
-      initial_delay_seconds: 30
-      period_seconds: 15
-    envs:
-      - { key: NODE_ENV, value: production }
-      - { key: NEXT_PUBLIC_APP_NAME, value: Vertiplay }
-      - { key: NEXT_PUBLIC_APP_URL, value: "https://mvp.vertiplay.com.br" }
-      - { key: NEXT_TELEMETRY_DISABLED, value: "1" }
+### Variáveis de ambiente (Production)
+
+Configuradas via `vercel env add` (a maioria como *Sensitive* — write-only, não dá pra reler depois de criada):
+
+| Var | Origem |
+|---|---|
+| `DATABASE_URL` / `DIRECT_URL` | Supabase `vertiplay-us` (pooler + direto) |
+| `NEXT_PUBLIC_APP_URL` / `NEXTAUTH_URL` | `https://mvp.vertiplay.com.br` |
+| `NEXT_PUBLIC_APP_NAME` | `Vertiplay` |
+| `ADMIN_EMAILS` | `agenciaf3xia@gmail.com,livoolivecommerce@gmail.com` |
+| `NEXTAUTH_SECRET` | gerado na config original (mantido) |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID` | Google Cloud Console, projeto "Vertiplay" (mantido da config original) |
+| `STRIPE_WEBHOOK_SECRET`, `MP_WEBHOOK_SECRET`, `NEXT_PUBLIC_MP_PUBLIC_KEY` | mantidos da config original |
+| `STRIPE_SECRET_KEY` | **faltando** — pegar no dashboard Stripe e rodar `vercel env add STRIPE_SECRET_KEY production` |
+| `MERCADOPAGO_ACCESS_TOKEN` | **faltando** — pegar no dashboard Mercado Pago e rodar `vercel env add MERCADOPAGO_ACCESS_TOKEN production` |
+| `GOOGLE_IOS_CLIENT_ID` / `GOOGLE_ANDROID_CLIENT_ID` / `NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID` | **faltando** — só bloqueia login Google nativo no Capacitor, não o web |
+
+Ver local: `~/.vertiplay-supabase.env` (credenciais do banco). Não existe `.env.local` de produção — tudo vive só nas envs da Vercel.
+
+### Deploy manual (fora do git push)
+
+```bash
+cd ~/projetos/vertiplay
+vercel --prod
 ```
 
-Secrets (Stripe, MP, NextAuth, Resend, Google) configurados como `type: SECRET` direto no painel DO.
+### Comandos úteis
 
-### Dockerfile
-
-Multi-stage:
-1. **deps** — `npm install --no-audit --no-fund`
-2. **builder** — `npx prisma generate || true` + `npm run build`
-3. **runner** — Node 22-alpine, user `nextjs:1001` (non-root)
-
-Boot:
-```sh
-npx prisma db push --accept-data-loss --skip-generate && exec npx next start -p 3030
+```bash
+vercel env ls                          # listar env vars
+vercel env add NOME production         # adicionar (lê da stdin ou prompt)
+vercel env rm NOME production --yes    # remover
+vercel logs <deployment-url>           # runtime logs
+vercel ls vertiplay                    # histórico de deployments
 ```
 
-## Postgres Managed
+## Postgres — Supabase
 
-Cluster: `vertiplay-db`
-- Region: NYC3
-- Plan: US$ 15.15/mês
-- **Attached como recurso do app**: Create → Attach existing DigitalOcean database
+- **Projeto:** `vertiplay-us` (ref `ezreisgjabvawlataugp`), região `us-east-1`, org `agenciaf3xia@gmail.com's Org`
+- **Prisma:** `DATABASE_URL` usa o pooler (porta 6543, transaction mode) pra runtime; `DIRECT_URL` usa porta 5432 pra `prisma db push`/migrations
+- Schema aplicado com `npx prisma db push` (sem migrations formais ainda — mesma filosofia MVP de antes)
+- ⚠️ Existe um segundo projeto Supabase órfão `vertiplay` (ref `lwhmalipdfzuhcspavyt`, região `sa-east-1`, vazio) — sobrou de uma tentativa anterior, não é usado. Pode ser apagado.
 
-A DO injeta `${vertiplay-db.DATABASE_URL}` em Run Time. **NÃO** setar `DATABASE_URL` manual — host privado só resolve via attach.
+### Aplicar mudança de schema
 
-Migração: `prisma db push` no boot (Dockerfile). Quando schema estabilizar, trocar pra `migrate deploy`.
+```bash
+cd ~/projetos/vertiplay
+set -a; source ~/.vertiplay-supabase.env; set +a
+npx prisma db push
+```
 
 ## Domínio
 
-### DNS (Registro.br)
-Domínio: `vertiplay.com.br`
-- Nameservers: `a.auto.dns.br` + `b.auto.dns.br` (Registro.br próprio)
-- **CNAME** `mvp` → `vertiplay-mozsm.ondigitalocean.app`
-- TTL default
+Domínio: `vertiplay.com.br`, DNS gerenciado no Registro.br (`a.auto.dns.br` / `b.auto.dns.br`).
 
-**Importante:** entrar só `mvp` no campo Nome, NÃO `mvp.vertiplay.com.br` (FQDN dá erro).
+**Pendente:** trocar o CNAME `mvp` de `vertiplay-mozsm.ondigitalocean.app` (DO, morto) pra `cname.vercel-dns.com` (Vercel), e adicionar o domínio em Vercel → Project → Settings → Domains.
 
 ### SSL
-DO emite via Let's Encrypt automaticamente. Issuer: Google Trust Services / Let's Encrypt.
-- Propagação DNS: 5-30min
-- Emissão de cert: 2-10min após DNS detectado
-
-### Adicionar domínio
-DO Console → App vertiplay → Settings → Networking → Add Domain:
-1. Domain: `mvp.vertiplay.com.br`
-2. Manage with: **External DNS provider** (mantém DNS no Registro.br)
-3. CNAME alias mostrado: copia pro Registro.br
-
-**NÃO** criar zona DNS no DO Networking → Domains. Isso quebra (criar só o domain no app).
-
-## Pipeline de deploy
-
-```
-1. git push origin main
-2. DO detecta push (GitHub webhook)
-3. Build container (3-5min)
-   ├─ npm install
-   ├─ prisma generate
-   └─ next build
-4. Push pra registry interno DO
-5. Rolling deploy (zero downtime)
-6. Health check /api/health
-7. Switch traffic
-```
-
-Logs: DO Console → App → Activity → Build/Deploy logs ou Runtime Logs (stdout).
-
-## Rollback
-
-DO Console → App → Activity → escolher deploy anterior → "Rollback to this deployment".
-
-Banco: rollback de schema requer migration reversa. Pra MVP com `db push`, não tem migration — última opção é restore de snapshot do DB.
+Vercel emite certificado Let's Encrypt automaticamente ao detectar o CNAME apontando pra ele.
 
 ## Backups
 
-### Postgres
-DO Managed DB faz backups automáticos:
-- Daily snapshots, retenção 7 dias
-- Point-in-time recovery 7 dias
-
-Acesso: DO Console → Databases → vertiplay-db → Backups.
+### Banco
+Supabase free tier faz backup diário automático (retenção 7 dias) — ver Project → Database → Backups.
 
 ### Repo
 GitHub `agf3xdev/vertiplay` — single source of truth.
 
 ### Secrets
-- `.env.local` (dev) — NUNCA commitar
-- DO envs (prod) — exportar via `doctl apps spec get <APP_ID>` periodicamente
+- Vercel envs (prod) — não existe cópia local completa; `~/.vertiplay-supabase.env` guarda só as credenciais do banco
+- Nunca commitar `.env.local`
 
 ### Keystore Android
 **CRÍTICO** — sem ele, app na Play Store fica órfão:
 - Local: `android/keystore/vertiplay-release.keystore`
 - Backup: Obsidian Vault + offline (HD externo, etc)
 
-## Custos
-
-| Item | Mensal |
-|---|---|
-| DO App Platform (apps-s-1vcpu-0.5gb) | US$ 5 |
-| DO Managed Postgres | US$ 15.15 |
-| Domain Registro.br | ~R$ 40/ano (R$ 3.33/mês) |
-| Resend (free tier) | US$ 0 (até 3k emails/mês) |
-| Stripe / MP | % por transação |
-| Cloudflare R2 (vídeos) | US$ 0 (free tier até 10GB) |
-| **Total infra** | **~US$ 21/mês** |
-
-## Monitoring
-
-- **Health check**: DO checa `/api/health` a cada 15s
-- **Runtime logs**: DO Console → Runtime Logs
-- **Build logs**: DO Console → Activity → Build
-- **Alerts**: configurável em Settings → Alerts (sem alertas custom ainda)
-
-## Comandos úteis (doctl)
-
-```bash
-# Listar apps
-doctl apps list
-
-# Get spec
-doctl apps spec get bf466225-39f2-4102-bb5f-49dacd2436ca
-
-# Logs
-doctl apps logs bf466225-39f2-4102-bb5f-49dacd2436ca --type=run --follow
-
-# Force redeploy
-doctl apps create-deployment bf466225-39f2-4102-bb5f-49dacd2436ca
-
-# Update env
-doctl apps update bf466225-39f2-4102-bb5f-49dacd2436ca --spec .do/app.yaml
-```
-
 ## Troubleshooting
 
-### Deploy fica em "building" eternamente
-- Olha Build Logs. Geralmente `npm install` timeout ou prisma generate falhou
-- Solução: cancel + retry
+### Deploy falha no build
+`vercel logs <url>` ou ver no dashboard → Deployments → build logs. Causa comum: `prisma generate` falhando por schema inválido.
 
-### App responde 5xx
-- Runtime Logs: erro de Prisma (DB não acessível?), env var faltando, port errado
-- Health check fail: `/api/health` precisa retornar 200
+### App responde 500 / erro de banco
+Confirma que `DATABASE_URL`/`DIRECT_URL` estão setadas e que o projeto Supabase está `ACTIVE_HEALTHY` (não pausado por inatividade — free tier pausa após 7 dias sem uso).
 
-### TLS handshake failure no domínio custom
-- Cert ainda não emitido. Aguardar 5-10min após CNAME propagar
-- Verifica via `https://dns.google/resolve?name=mvp.vertiplay.com.br&type=CNAME` se DNS bate
-
-### Webhook Stripe/MP não chega
-- Confirma URL configurada no dashboard do gateway
-- Olha LedgerEntry pra ver se chegou e com qual `type` (signature_invalid?)
-- Re-emitir webhook secret se necessário
+### Checkout Stripe/MP falha
+`STRIPE_SECRET_KEY` / `MERCADOPAGO_ACCESS_TOKEN` provavelmente não configurados ainda (ver tabela de envs acima).
 
 ### Login Google falha em modo Test
-- Adicionar email do user em Google Cloud Console → APIs & Services → OAuth consent screen → Test users
-- Ou publicar o app no Google (passa por verificação)
+Adicionar email do user em Google Cloud Console → APIs & Services → OAuth consent screen → Test users. Ou publicar o app.

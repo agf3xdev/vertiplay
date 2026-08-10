@@ -14,12 +14,12 @@ Produzido pela [F3X](https://github.com/agf3xdev) para Diogo Archanjo (CEO).
 |---|---|
 | **App web** | Next.js 15 (App Router), React 19, TypeScript 5, Tailwind v4 |
 | **Auth** | NextAuth v5 (Google OAuth + Email OTP via Resend + Google nativo Capacitor) |
-| **Banco** | Postgres Managed (DigitalOcean), Prisma 6 ORM |
+| **Banco** | Postgres Managed (Supabase), Prisma 6 ORM |
 | **Pagamentos** | Stripe (cartão) + Mercado Pago (PIX/cartão/boleto) — **LIVE** |
 | **Vídeo** | HLS.js + MP4; produção planejada Cloudflare R2 |
 | **Estado client** | Zustand + persist localStorage |
 | **Mobile wrap** | Capacitor 8 (WebView que carrega `mvp.vertiplay.com.br`) |
-| **Hospedagem** | DigitalOcean App Platform (Docker) |
+| **Hospedagem** | Vercel |
 | **Storage** | Cloudflare R2 (vídeos planejado), Unsplash CDN (placeholders) |
 
 ## Estrutura
@@ -99,7 +99,7 @@ npm run dev   # http://localhost:3030
 - **[API](docs/API.md)** — 30+ endpoints documentados
 - **[Admin](docs/ADMIN.md)** — painel administrativo
 - **[Native](docs/NATIVE.md)** — iOS + Android Capacitor
-- **[Deploy](docs/DEPLOY.md)** — DigitalOcean + DNS + SSL
+- **[Deploy](docs/DEPLOY.md)** — Vercel + Supabase + DNS + SSL
 - **[Environment](docs/ENVIRONMENT.md)** — todas as env vars
 
 ## Mercado

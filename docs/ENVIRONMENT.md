@@ -6,9 +6,9 @@ Todas as env vars usadas pelo Vertiplay. Algumas são obrigatórias, outras opci
 
 Criar na raiz. Nunca commitar (`.gitignore` já cuida).
 
-## Prod: DigitalOcean App Platform
+## Prod: Vercel
 
-Configurar via DO Console → App → Settings → Environment Variables. Marcar `type: SECRET` para credenciais.
+Configurar via `vercel env add NOME production` (CLI) ou Dashboard → Project → Settings → Environment Variables. Marcar como *Sensitive* para credenciais.
 
 ---
 
@@ -18,7 +18,10 @@ Configurar via DO Console → App → Settings → Environment Variables. Marcar
 String de conexão Postgres.
 
 - **Dev:** `postgresql://user:pass@localhost:5432/vertiplay`
-- **Prod:** **injetada automaticamente** pelo DO via `${vertiplay-db.DATABASE_URL}` ao attachar o cluster. NÃO setar manualmente em prod.
+- **Prod:** pooler do Supabase (`vertiplay-us`, porta 6543). Ver `DIRECT_URL` abaixo para migrations.
+
+### `DIRECT_URL` *(obrigatória)*
+Conexão direta ao Postgres (porta 5432, sem pgbouncer) — usada só por `prisma db push`/migrations. Mesmo host do pooler Supabase, porta diferente.
 
 ### `NEXTAUTH_SECRET` *(obrigatória)*
 Random secret para assinar JWT. Gerar com `openssl rand -base64 32`.
@@ -183,12 +186,12 @@ NEXT_PUBLIC_MP_PUBLIC_KEY="TEST-..."
 ADMIN_EMAILS="seu-email@gmail.com"
 ```
 
-## Como configurar no DO
+## Como configurar na Vercel
 
 ```bash
-# Via UI: Console → App → Settings → Environment Variables → Edit
+# Via UI: Dashboard → Project vertiplay → Settings → Environment Variables
 # Via CLI:
-doctl apps spec get <APP_ID> > app.yaml
-# Edita app.yaml adicionando envs em type: SECRET
-doctl apps update <APP_ID> --spec app.yaml
+printf '%s' "valor" | vercel env add NOME_DA_VAR production
+vercel env ls
+vercel env rm NOME_DA_VAR production --yes
 ```
