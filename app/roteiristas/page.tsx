@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import {
   Send,
   CheckCircle2,
@@ -90,6 +89,11 @@ const STEPS = [
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB
 
+// Esta página também é servida em roteiristas.vertiplay.com.br (subdomínio
+// dedicado, via middleware) — links "voltar" precisam do host absoluto do
+// app principal, não de "/" (que no subdomínio recai nesta mesma página).
+const MAIN_APP_URL = "https://mvp.vertiplay.com.br";
+
 export default function WritersLandingPage() {
   const [step, setStep] = useState<"form" | "success">("form");
   const [submitting, setSubmitting] = useState(false);
@@ -173,9 +177,9 @@ export default function WritersLandingPage() {
   return (
     <div className="min-h-[100dvh] bg-[var(--color-vp-bg)] text-white">
       <header className="max-w-5xl mx-auto px-6 py-5 flex items-center justify-between">
-        <Link href="/">
+        <a href={MAIN_APP_URL}>
           <Logo size={26} />
-        </Link>
+        </a>
         {open && (
           <a
             href="#form"
@@ -199,12 +203,12 @@ export default function WritersLandingPage() {
             Se o seu projeto for selecionado, ele poderá entrar em desenvolvimento e
             produção junto ao <b className="vp-gradient-text">Vertiplay</b>.
           </p>
-          <Link
-            href="/"
+          <a
+            href={MAIN_APP_URL}
             className="inline-block px-8 py-3.5 rounded-2xl vp-gradient vp-glow font-bold"
           >
             Conhecer o Vertiplay
-          </Link>
+          </a>
         </div>
       ) : (
         <>
@@ -730,9 +734,9 @@ export default function WritersLandingPage() {
           <footer className="border-t border-white/8 py-8">
             <div className="max-w-5xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/40">
               <span>© {new Date().getFullYear()} Vertiplay — produzido pela F3X</span>
-              <Link href="/" className="hover:text-white/70">
+              <a href={MAIN_APP_URL} className="hover:text-white/70">
                 Voltar pro Vertiplay
-              </Link>
+              </a>
             </div>
           </footer>
         </>
