@@ -1,9 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
-  ChevronLeft,
   Feather,
   Send,
   CheckCircle2,
@@ -15,6 +13,7 @@ import {
 } from "lucide-react";
 import { GENRES } from "@/lib/catalog";
 import { cn } from "@/lib/cn";
+import { Logo } from "@/components/Logo";
 
 const EXPERIENCE_LEVELS = [
   { id: "iniciante", label: "Iniciante" },
@@ -23,7 +22,6 @@ const EXPERIENCE_LEVELS = [
 ];
 
 export default function WritersLandingPage() {
-  const router = useRouter();
   const [step, setStep] = useState<"form" | "success">("form");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -73,255 +71,255 @@ export default function WritersLandingPage() {
     }
   }
 
-  if (step === "success") {
-    return (
-      <div className="min-h-[100dvh] px-6 pt-16 safe-top text-center">
-        <div className="w-24 h-24 vp-gradient rounded-full flex items-center justify-center mx-auto mb-5 vp-glow">
-          <CheckCircle2 className="w-12 h-12" />
-        </div>
-        <h1 className="text-2xl font-extrabold mb-2">Candidatura recebida!</h1>
-        <p className="text-white/70 text-sm mb-1">
-          Nossa sala de roteiro vai avaliar seu material.
-        </p>
-        <p className="text-white/55 text-xs mb-8">
-          Se aprovado(a), você entra na fila de roteiristas do{" "}
-          <b className="vp-gradient-text">Vertiplay</b> com remuneração por roteiro.
-        </p>
-        <Link
-          href="/"
-          className="block py-3.5 rounded-2xl vp-gradient vp-glow font-bold"
-        >
-          Voltar para o app
-        </Link>
-        <button
-          onClick={() => {
-            setForm({
-              name: "",
-              email: "",
-              phone: "",
-              portfolioUrl: "",
-              experience: "",
-              genres: [],
-              sample: "",
-              motivation: "",
-              availability: "",
-              consent: false,
-            });
-            setStep("form");
-          }}
-          className="block w-full mt-3 text-sm text-white/65 underline"
-        >
-          Enviar outra candidatura
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div className="pb-32">
-      {/* Hero */}
-      <div className="relative">
-        <div className="vp-gradient h-56 relative overflow-hidden">
-          <Sparkles className="absolute top-6 left-8 w-4 h-4 opacity-50" />
-          <Sparkles className="absolute top-16 right-14 w-5 h-5 opacity-60" />
-          <Sparkles className="absolute bottom-10 left-20 w-3 h-3 opacity-70" />
-          <Sparkles className="absolute bottom-20 right-8 w-4 h-4 opacity-50" />
-          <button
-            onClick={() => router.back()}
-            className="absolute top-4 left-3 z-10 w-10 h-10 rounded-full bg-black/30 backdrop-blur flex items-center justify-center safe-top"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <div className="absolute inset-x-0 bottom-0 px-5 pb-5 safe-top">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-white/85 mb-1">
-              Vertiplay convida
-            </p>
-            <h1 className="text-2xl font-extrabold leading-tight">
-              Escreva a próxima novela viral do Brasil.
-            </h1>
-            <p className="text-sm text-white/95 mt-1">
-              Estamos montando a sala de roteiro BR-first. Cadastre-se como roteirista.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="px-4 -mt-3">
-        {/* Benefícios */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5">
-          <Perk icon={Coins} label="Remuneração por roteiro aprovado" />
-          <Perk icon={BadgeCheck} label="Crédito oficial nos episódios" />
-          <Perk icon={Users} label="Faça parte da sala de roteiro" />
-          <Perk icon={Feather} label="Publique em ritmo semanal/mensal" />
-        </div>
-
-        {/* Form */}
-        <div className="vp-card rounded-3xl p-5 space-y-4">
-          <Field
-            label="Seu nome"
-            placeholder="Como devemos te chamar?"
-            value={form.name}
-            onChange={(v) => setForm((s) => ({ ...s, name: v }))}
-            icon={Feather}
-          />
-
-          <div className="grid grid-cols-2 gap-2">
-            <Field
-              label="E-mail"
-              placeholder="seu@email.com"
-              type="email"
-              value={form.email}
-              onChange={(v) => setForm((s) => ({ ...s, email: v }))}
-            />
-            <Field
-              label="WhatsApp (opcional)"
-              placeholder="+55 ..."
-              value={form.phone}
-              onChange={(v) => setForm((s) => ({ ...s, phone: v }))}
-            />
-          </div>
-
-          <Field
-            label="Portfólio (opcional)"
-            placeholder="Wattpad, Instagram, site, PDF..."
-            value={form.portfolioUrl}
-            onChange={(v) => setForm((s) => ({ ...s, portfolioUrl: v }))}
-            icon={Link2}
-          />
-
-          <div>
-            <p className="text-xs text-white/65 mb-2 font-medium">
-              Nível de experiência <span className="text-[var(--color-vp-pink)]">*</span>
-            </p>
-            <div className="flex gap-2 flex-wrap">
-              {EXPERIENCE_LEVELS.map((e) => (
-                <button
-                  key={e.id}
-                  type="button"
-                  onClick={() => setForm((s) => ({ ...s, experience: e.id }))}
-                  className={cn(
-                    "px-3 py-1.5 rounded-full text-xs font-medium border transition",
-                    form.experience === e.id
-                      ? "vp-gradient border-transparent"
-                      : "border-white/15 text-white/65"
-                  )}
-                >
-                  {e.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <p className="text-xs text-white/65 mb-2 font-medium">
-              Gêneros que você domina <span className="text-white/40">(opcional)</span>
-            </p>
-            <div className="flex gap-2 flex-wrap">
-              {GENRES.map((g) => (
-                <button
-                  key={g}
-                  type="button"
-                  onClick={() => toggleGenre(g)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-full text-xs font-medium border transition",
-                    form.genres.includes(g)
-                      ? "vp-gradient border-transparent"
-                      : "border-white/15 text-white/65"
-                  )}
-                >
-                  {g}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <p className="text-xs text-white/65 mb-2 font-medium">
-              Amostra de escrita <span className="text-white/40">(cena ou sinopse)</span>
-            </p>
-            <textarea
-              rows={7}
-              value={form.sample}
-              onChange={(e) => setForm((s) => ({ ...s, sample: e.target.value }))}
-              placeholder="Cole aqui uma cena curta ou a sinopse de um roteiro seu, original ou de amostra. É o que mais pesa na avaliação."
-              className="w-full bg-white/8 border border-white/10 rounded-2xl px-3 py-3 text-sm placeholder:text-white/40 focus:outline-none focus:border-[var(--color-vp-pink)] resize-none"
-            />
-            <p className="text-[10px] text-white/45 mt-1 flex justify-between">
-              <span>Mínimo 60 caracteres</span>
-              <span
-                className={
-                  form.sample.length >= 60 ? "text-[var(--color-vp-pink)]" : ""
-                }
-              >
-                {form.sample.length} / 4000
-              </span>
-            </p>
-          </div>
-
-          <Field
-            label="Por que quer escrever pro Vertiplay? (opcional)"
-            placeholder="Sua motivação em uma frase"
-            value={form.motivation}
-            onChange={(v) => setForm((s) => ({ ...s, motivation: v }))}
-          />
-
-          <Field
-            label="Disponibilidade (opcional)"
-            placeholder="Ex.: 1 roteiro por semana"
-            value={form.availability}
-            onChange={(v) => setForm((s) => ({ ...s, availability: v }))}
-          />
-
-          <label className="flex items-start gap-3 mt-1 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={form.consent}
-              onChange={(e) =>
-                setForm((s) => ({ ...s, consent: e.target.checked }))
-              }
-              className="mt-0.5 w-4 h-4 accent-[var(--color-vp-pink)]"
-            />
-            <span className="text-[11px] text-white/70 leading-relaxed">
-              Autorizo o Vertiplay a avaliar meu material e entrar em contato sobre
-              oportunidades como roteirista, com remuneração combinada por roteiro aprovado.
-            </span>
-          </label>
-        </div>
-
-        {error && (
-          <p className="text-[11px] text-rose-300 text-center mt-3">{error}</p>
-        )}
-
-        <p className="text-[10px] text-white/40 text-center mt-3 px-4">
-          Não compartilhamos seus dados nem seu material com terceiros. Você é
-          creditado(a) e remunerado(a) por roteiro aprovado.
-        </p>
-      </div>
-
-      {/* CTA fixo */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] safe-bottom z-30 bg-[rgba(10,6,18,0.95)] border-t border-white/8 px-4 py-3 backdrop-blur-md">
-        <button
-          onClick={submit}
-          disabled={!valid || submitting}
-          className={cn(
-            "w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2",
-            valid ? "vp-gradient vp-glow" : "bg-white/10 text-white/45"
-          )}
+    <div className="min-h-[100dvh] bg-[var(--color-vp-bg)] text-white">
+      <header className="max-w-5xl mx-auto px-6 py-5 flex items-center justify-between">
+        <Link href="/">
+          <Logo size={26} />
+        </Link>
+        <a
+          href="#form"
+          className="hidden sm:inline-flex px-4 py-2 rounded-full vp-gradient text-sm font-bold vp-glow"
         >
-          {submitting ? (
-            "Enviando..."
-          ) : (
-            <>
-              <Send className="w-4 h-4" /> Quero ser roteirista
-            </>
-          )}
-        </button>
-        {!valid && (
-          <p className="text-[10px] text-white/45 text-center mt-1.5">
-            Preencha nome, e-mail, experiência, amostra (60+ caracteres) e aceite os termos
+          Quero me candidatar
+        </a>
+      </header>
+
+      {step === "success" ? (
+        <div className="max-w-lg mx-auto px-6 py-20 text-center">
+          <div className="w-24 h-24 vp-gradient rounded-full flex items-center justify-center mx-auto mb-6 vp-glow">
+            <CheckCircle2 className="w-12 h-12" />
+          </div>
+          <h1 className="text-3xl font-extrabold mb-3">Candidatura recebida!</h1>
+          <p className="text-white/70 mb-1">
+            Nossa sala de roteiro vai avaliar seu material.
           </p>
-        )}
-      </div>
+          <p className="text-white/55 text-sm mb-10">
+            Se aprovado(a), você entra na fila de roteiristas do{" "}
+            <b className="vp-gradient-text">Vertiplay</b> com remuneração por roteiro.
+          </p>
+          <Link
+            href="/"
+            className="inline-block px-8 py-3.5 rounded-2xl vp-gradient vp-glow font-bold"
+          >
+            Conhecer o Vertiplay
+          </Link>
+        </div>
+      ) : (
+        <>
+          {/* Hero */}
+          <section className="relative overflow-hidden">
+            <div className="absolute inset-0 vp-gradient opacity-20" />
+            <Sparkles className="absolute top-16 left-[8%] w-5 h-5 opacity-40" />
+            <Sparkles className="absolute top-24 right-[12%] w-6 h-6 opacity-50" />
+            <Sparkles className="absolute bottom-10 left-[20%] w-4 h-4 opacity-40" />
+            <div className="relative max-w-3xl mx-auto px-6 pt-10 pb-14 text-center">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/70 mb-4">
+                Vertiplay convida
+              </p>
+              <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight mb-4">
+                Escreva a próxima novela viral do Brasil.
+              </h1>
+              <p className="text-base sm:text-lg text-white/75 max-w-xl mx-auto">
+                Estamos montando a sala de roteiro BR-first do short drama nacional.
+                Cadastre-se como roteirista e concorra a ter sua história produzida.
+              </p>
+            </div>
+          </section>
+
+          {/* Benefícios */}
+          <section className="max-w-4xl mx-auto px-6 pb-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <Perk icon={Coins} label="Remuneração por roteiro aprovado" />
+              <Perk icon={BadgeCheck} label="Crédito oficial nos episódios" />
+              <Perk icon={Users} label="Faça parte da sala de roteiro" />
+              <Perk icon={Feather} label="Publique em ritmo semanal/mensal" />
+            </div>
+          </section>
+
+          {/* Form */}
+          <section id="form" className="max-w-2xl mx-auto px-6 py-14">
+            <div className="vp-card rounded-3xl p-6 sm:p-8 space-y-5">
+              <div>
+                <h2 className="text-xl font-extrabold mb-1">Candidatura de roteirista</h2>
+                <p className="text-sm text-white/55">
+                  Leva menos de 5 minutos. Campos com <span className="text-[var(--color-vp-pink)]">*</span> são obrigatórios.
+                </p>
+              </div>
+
+              <Field
+                label="Seu nome"
+                placeholder="Como devemos te chamar?"
+                value={form.name}
+                onChange={(v) => setForm((s) => ({ ...s, name: v }))}
+                icon={Feather}
+              />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Field
+                  label="E-mail"
+                  placeholder="seu@email.com"
+                  type="email"
+                  value={form.email}
+                  onChange={(v) => setForm((s) => ({ ...s, email: v }))}
+                />
+                <Field
+                  label="WhatsApp (opcional)"
+                  placeholder="+55 ..."
+                  value={form.phone}
+                  onChange={(v) => setForm((s) => ({ ...s, phone: v }))}
+                />
+              </div>
+
+              <Field
+                label="Portfólio (opcional)"
+                placeholder="Wattpad, Instagram, site, PDF..."
+                value={form.portfolioUrl}
+                onChange={(v) => setForm((s) => ({ ...s, portfolioUrl: v }))}
+                icon={Link2}
+              />
+
+              <div>
+                <p className="text-xs text-white/65 mb-2 font-medium">
+                  Nível de experiência <span className="text-[var(--color-vp-pink)]">*</span>
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  {EXPERIENCE_LEVELS.map((e) => (
+                    <button
+                      key={e.id}
+                      type="button"
+                      onClick={() => setForm((s) => ({ ...s, experience: e.id }))}
+                      className={cn(
+                        "px-3 py-1.5 rounded-full text-xs font-medium border transition",
+                        form.experience === e.id
+                          ? "vp-gradient border-transparent"
+                          : "border-white/15 text-white/65 hover:border-white/30"
+                      )}
+                    >
+                      {e.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs text-white/65 mb-2 font-medium">
+                  Gêneros que você domina <span className="text-white/40">(opcional)</span>
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  {GENRES.map((g) => (
+                    <button
+                      key={g}
+                      type="button"
+                      onClick={() => toggleGenre(g)}
+                      className={cn(
+                        "px-3 py-1.5 rounded-full text-xs font-medium border transition",
+                        form.genres.includes(g)
+                          ? "vp-gradient border-transparent"
+                          : "border-white/15 text-white/65 hover:border-white/30"
+                      )}
+                    >
+                      {g}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs text-white/65 mb-2 font-medium">
+                  Amostra de escrita <span className="text-white/40">(cena ou sinopse)</span>{" "}
+                  <span className="text-[var(--color-vp-pink)]">*</span>
+                </p>
+                <textarea
+                  rows={7}
+                  value={form.sample}
+                  onChange={(e) => setForm((s) => ({ ...s, sample: e.target.value }))}
+                  placeholder="Cole aqui uma cena curta ou a sinopse de um roteiro seu, original ou de amostra. É o que mais pesa na avaliação."
+                  className="w-full bg-white/8 border border-white/10 rounded-2xl px-3 py-3 text-sm placeholder:text-white/40 focus:outline-none focus:border-[var(--color-vp-pink)] resize-none"
+                />
+                <p className="text-[10px] text-white/45 mt-1 flex justify-between">
+                  <span>Mínimo 60 caracteres</span>
+                  <span
+                    className={
+                      form.sample.length >= 60 ? "text-[var(--color-vp-pink)]" : ""
+                    }
+                  >
+                    {form.sample.length} / 4000
+                  </span>
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Field
+                  label="Por que quer escrever pro Vertiplay? (opcional)"
+                  placeholder="Sua motivação em uma frase"
+                  value={form.motivation}
+                  onChange={(v) => setForm((s) => ({ ...s, motivation: v }))}
+                />
+                <Field
+                  label="Disponibilidade (opcional)"
+                  placeholder="Ex.: 1 roteiro por semana"
+                  value={form.availability}
+                  onChange={(v) => setForm((s) => ({ ...s, availability: v }))}
+                />
+              </div>
+
+              <label className="flex items-start gap-3 pt-1 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.consent}
+                  onChange={(e) =>
+                    setForm((s) => ({ ...s, consent: e.target.checked }))
+                  }
+                  className="mt-0.5 w-4 h-4 accent-[var(--color-vp-pink)]"
+                />
+                <span className="text-[11px] text-white/70 leading-relaxed">
+                  Autorizo o Vertiplay a avaliar meu material e entrar em contato sobre
+                  oportunidades como roteirista, com remuneração combinada por roteiro aprovado.
+                </span>
+              </label>
+
+              {error && <p className="text-[11px] text-rose-300">{error}</p>}
+
+              <button
+                onClick={submit}
+                disabled={!valid || submitting}
+                className={cn(
+                  "w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition",
+                  valid ? "vp-gradient vp-glow" : "bg-white/10 text-white/45"
+                )}
+              >
+                {submitting ? (
+                  "Enviando..."
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" /> Quero ser roteirista
+                  </>
+                )}
+              </button>
+              {!valid && (
+                <p className="text-[10px] text-white/45 text-center -mt-2">
+                  Preencha nome, e-mail, experiência, amostra (60+ caracteres) e aceite os termos
+                </p>
+              )}
+            </div>
+
+            <p className="text-[11px] text-white/40 text-center mt-5 max-w-md mx-auto">
+              Não compartilhamos seus dados nem seu material com terceiros. Você é
+              creditado(a) e remunerado(a) por roteiro aprovado.
+            </p>
+          </section>
+
+          <footer className="border-t border-white/8 py-8">
+            <div className="max-w-5xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/40">
+              <span>© {new Date().getFullYear()} Vertiplay — produzido pela F3X</span>
+              <Link href="/" className="hover:text-white/70">
+                Voltar pro Vertiplay
+              </Link>
+            </div>
+          </footer>
+        </>
+      )}
     </div>
   );
 }
@@ -365,9 +363,9 @@ function Field({
 
 function Perk({ icon: Icon, label }: { icon: any; label: string }) {
   return (
-    <div className="vp-card rounded-2xl p-3 flex flex-col items-center gap-1.5 text-center">
-      <Icon className="w-4 h-4 text-[var(--color-vp-pink)]" />
-      <span className="text-[10px] leading-tight">{label}</span>
+    <div className="vp-card rounded-2xl p-4 flex flex-col items-center gap-2 text-center">
+      <Icon className="w-5 h-5 text-[var(--color-vp-pink)]" />
+      <span className="text-xs leading-tight text-white/80">{label}</span>
     </div>
   );
 }
