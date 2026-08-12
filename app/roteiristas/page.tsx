@@ -109,11 +109,14 @@ export default function WritersLandingPage() {
         <>
           {/* Hero */}
           <section className="relative overflow-hidden">
-            <div className="absolute inset-0 vp-gradient opacity-20" />
+            <div
+              aria-hidden
+              className="pointer-events-none absolute left-1/2 top-0 w-[900px] max-w-[160%] aspect-square -translate-x-1/2 -translate-y-[45%] rounded-full vp-gradient opacity-35 blur-[100px]"
+            />
             <Sparkles className="absolute top-16 left-[8%] w-5 h-5 opacity-40" />
             <Sparkles className="absolute top-24 right-[12%] w-6 h-6 opacity-50" />
             <Sparkles className="absolute bottom-10 left-[20%] w-4 h-4 opacity-40" />
-            <div className="relative max-w-3xl mx-auto px-6 pt-10 pb-14 text-center">
+            <div className="relative max-w-3xl mx-auto px-6 pt-14 pb-20 text-center">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/70 mb-4">
                 Vertiplay convida
               </p>
@@ -128,7 +131,7 @@ export default function WritersLandingPage() {
           </section>
 
           {/* Benefícios */}
-          <section className="max-w-4xl mx-auto px-6 pb-4">
+          <section className="max-w-4xl mx-auto px-6 pb-4 -mt-10 relative">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <Perk icon={Coins} label="Remuneração por roteiro aprovado" />
               <Perk icon={BadgeCheck} label="Crédito oficial nos episódios" />
