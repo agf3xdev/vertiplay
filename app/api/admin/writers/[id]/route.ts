@@ -23,6 +23,6 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
   if (g) return g;
   const { id } = await params;
   const deleted = await prisma.writerApplication.delete({ where: { id } });
-  if (deleted.scriptFileUrl) await deleteScriptFile(deleted.scriptFileUrl);
+  if (deleted.argumentFileUrl) await deleteScriptFile(deleted.argumentFileUrl);
   return NextResponse.json({ ok: true });
 }

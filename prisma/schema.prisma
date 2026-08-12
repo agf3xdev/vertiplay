@@ -303,25 +303,24 @@ model StorySubmission {
   createdAt   DateTime @default(now())
 }
 
-// Cadastro de roteiristas — recrutamento pra sala de roteiro do Vertiplay
-// (diferente do StorySubmission, que é UGC pontual de uma história).
+// Seleção de histórias para novelas verticais — chamada aberta pra novos
+// autores (diferente do StorySubmission, que é UGC pontual e informal).
 model WriterApplication {
-  id           String   @id @default(cuid())
-  name         String
-  email        String
-  phone        String?
-  portfolioUrl String?  // Wattpad, Instagram, site, PDF...
-  experience   String   // "iniciante" | "amador" | "profissional"
-  scriptGenre  String   // gênero do roteiro anexado/amostra — obrigatório
-  genres       String   // CSV opcional: outros gêneros que domina
-  sample       String   // trecho de roteiro/sinopse de amostra ou link
-  scriptFileUrl  String? // path no bucket privado Supabase Storage "roteiros"
-  scriptFileName String? // nome original do arquivo, pra exibir no admin
-  motivation   String?  // por que quer escrever pro Vertiplay
-  availability String?  // ex: "1 roteiro por semana"
-  consent      Boolean  @default(false)
-  status       String   @default("pending") // pending | reviewing | approved | rejected
-  createdAt    DateTime @default(now())
+  id               String   @id @default(cuid())
+  name             String   // nome completo
+  artisticName     String?  // nome artístico, opcional
+  email            String
+  phone            String   // telefone
+  cityState        String   // cidade / estado
+  portfolioUrl     String?  // Instagram/portfólio, opcional
+  workTitle        String   // título da obra
+  scriptGenre      String   // "Drama" | "Romance" | "Comédia Romântica"
+  synopsis         String   // sinopse — apresentação clara e objetiva da história
+  argumentFileUrl  String   // path no bucket privado Supabase Storage "roteiros" — PDF, obrigatório
+  argumentFileName String   // nome original do arquivo, pra exibir no admin
+  consent          Boolean  @default(false) // aceite do Termo de Ciência e Responsabilidade
+  status           String   @default("pending") // pending | reviewing | approved | rejected
+  createdAt        DateTime @default(now())
 }
 
 model OrderItem {

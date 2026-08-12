@@ -8,9 +8,9 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
   if (g) return g;
   const { id } = await params;
   const writer = await prisma.writerApplication.findUnique({ where: { id } });
-  if (!writer?.scriptFileUrl) {
+  if (!writer?.argumentFileUrl) {
     return NextResponse.json({ error: "Sem arquivo anexado" }, { status: 404 });
   }
-  const url = await signScriptFileUrl(writer.scriptFileUrl);
+  const url = await signScriptFileUrl(writer.argumentFileUrl);
   return NextResponse.redirect(url);
 }

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import type { WriterApplication } from "@prisma/client";
 import { PageHeader, Card, Badge, EmptyState } from "@/components/admin/ui";
 import { cn } from "@/lib/cn";
-import { Mail, Phone, Link2, FileDown, Trash2 } from "lucide-react";
+import { Mail, Phone, Link2, MapPin, FileDown, Trash2 } from "lucide-react";
 
 const STATUS_TABS: { id: string; label: string; tone: any }[] = [
   { id: "all", label: "Todas", tone: "default" },
@@ -13,12 +13,6 @@ const STATUS_TABS: { id: string; label: string; tone: any }[] = [
   { id: "approved", label: "Aprovadas", tone: "success" },
   { id: "rejected", label: "Rejeitadas", tone: "danger" },
 ];
-
-const EXPERIENCE_LABEL: Record<string, string> = {
-  iniciante: "Iniciante",
-  amador: "Amador(a)",
-  profissional: "Profissional",
-};
 
 export function WritersClient({
   writers,
@@ -58,7 +52,7 @@ export function WritersClient({
     <div>
       <PageHeader
         title="Roteiristas"
-        subtitle="Candidaturas recebidas pela landing page 'Seja roteirista'."
+        subtitle="Histórias recebidas pela seleção 'Seu roteiro. Nossa tela.'"
       />
 
       <div className="flex gap-2 overflow-x-auto no-scrollbar mb-4 -mx-2 px-2">
@@ -91,7 +85,7 @@ export function WritersClient({
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-bold">{w.name}</h3>
+                    <h3 className="font-bold">{w.workTitle}</h3>
                     <Badge
                       tone={
                         w.status === "pending"
@@ -105,12 +99,13 @@ export function WritersClient({
                     >
                       {w.status}
                     </Badge>
-                    <Badge>{EXPERIENCE_LABEL[w.experience] ?? w.experience}</Badge>
                     <Badge tone="info">{w.scriptGenre}</Badge>
                   </div>
                   <p className="text-xs text-white/55 mt-1">
+                    Por <b>{w.name}</b>
+                    {w.artisticName && <> ({w.artisticName})</>}
+                    {" · "}
                     {w.createdAt.toLocaleDateString("pt-BR")} {w.createdAt.toLocaleTimeString("pt-BR").slice(0, 5)}
-                    {w.genres && <> · também domina: {w.genres}</>}
                   </p>
                 </div>
                 <button onClick={() => del(w.id)} className="text-rose-300 text-xs flex items-center gap-1 shrink-0">
@@ -118,38 +113,26 @@ export function WritersClient({
                 </button>
               </div>
 
-              <p className="text-sm text-white/85 mt-3 leading-relaxed whitespace-pre-line">{w.sample}</p>
-
-              {w.motivation && (
-                <p className="text-[11px] text-white/55 mt-2 italic">
-                  Motivação: {w.motivation}
-                </p>
-              )}
-              {w.availability && (
-                <p className="text-[11px] text-white/45 mt-1">
-                  Disponibilidade: {w.availability}
-                </p>
-              )}
+              <p className="text-sm text-white/85 mt-3 leading-relaxed whitespace-pre-line">{w.synopsis}</p>
 
               <div className="flex flex-wrap gap-3 mt-3 text-[11px] text-white/55">
                 <a href={`mailto:${w.email}`} className="flex items-center gap-1 hover:text-white">
                   <Mail className="w-3 h-3" /> {w.email}
                 </a>
-                {w.phone && (
-                  <a href={`https://wa.me/${w.phone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-white">
-                    <Phone className="w-3 h-3" /> {w.phone}
-                  </a>
-                )}
+                <a href={`https://wa.me/${w.phone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-white">
+                  <Phone className="w-3 h-3" /> {w.phone}
+                </a>
+                <span className="flex items-center gap-1">
+                  <MapPin className="w-3 h-3" /> {w.cityState}
+                </span>
                 {w.portfolioUrl && (
                   <a href={w.portfolioUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-white">
                     <Link2 className="w-3 h-3" /> Portfólio
                   </a>
                 )}
-                {w.scriptFileUrl && (
-                  <a href={`/api/admin/writers/${w.id}/file`} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-emerald-300 hover:text-emerald-200">
-                    <FileDown className="w-3 h-3" /> {w.scriptFileName ?? "Baixar roteiro"}
-                  </a>
-                )}
+                <a href={`/api/admin/writers/${w.id}/file`} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-emerald-300 hover:text-emerald-200">
+                  <FileDown className="w-3 h-3" /> {w.argumentFileName}
+                </a>
                 {!w.consent && <Badge tone="danger">SEM consentimento</Badge>}
               </div>
 
