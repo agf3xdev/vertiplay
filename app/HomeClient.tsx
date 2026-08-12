@@ -116,7 +116,7 @@ export function HomeClient({
         href="/roteiristas"
         className="block mx-4 mt-2 text-center text-xs text-white/55 hover:text-white/80"
       >
-        É roteirista profissional? <span className="vp-gradient-text font-semibold">Cadastre-se aqui →</span>
+        Tem uma história pra novela vertical? <span className="vp-gradient-text font-semibold">Inscreva-se aqui →</span>
       </Link>
 
       {/* Row: Exclusivos */}
