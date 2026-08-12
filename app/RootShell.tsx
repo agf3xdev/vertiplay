@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { BottomNav } from "@/components/BottomNav";
 
@@ -9,18 +9,18 @@ const FULLSCREEN_ROUTES = ["/admin", "/roteiristas"];
 
 // roteiristas.vertiplay.com.br reescreve "/" pra "/roteiristas" no middleware
 // (server-side) — usePathname() não reflete rewrites, só a URL da barra de
-// endereço, que nesse host continua sendo "/". Por isso checamos o hostname
-// aqui também. Isso não roda no servidor (evita forçar o app inteiro a virar
-// dinâmico só por causa de um subdomínio) — o mobile-frame pode aparecer por
-// uma fração de segundo antes do useEffect corrigir.
+// endereço, que nesse host continua sendo "/". Checamos o hostname aqui
+// também. Como a página /roteiristas é estática, o HTML gerado no build já
+// nasce sem o mobile-frame (o path de build é literalmente "/roteiristas");
+// o initializer preguiçoso do useState roda já na primeira renderização do
+// client (não precisa de useEffect) e bate com esse HTML, sem flash.
 const FULLSCREEN_HOSTS = ["roteiristas.vertiplay.com.br"];
 
 export function RootShell({ children }: { children: React.ReactNode }) {
   const path = usePathname() ?? "";
-  const [isFullscreenHost, setIsFullscreenHost] = useState(false);
-  useEffect(() => {
-    setIsFullscreenHost(FULLSCREEN_HOSTS.includes(window.location.hostname));
-  }, []);
+  const [isFullscreenHost] = useState(
+    () => typeof window !== "undefined" && FULLSCREEN_HOSTS.includes(window.location.hostname)
+  );
 
   const isFullscreen =
     isFullscreenHost ||
