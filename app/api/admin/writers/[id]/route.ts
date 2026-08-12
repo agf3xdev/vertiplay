@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { gate } from "@/lib/admin-api";
+import { deleteScriptFile } from "@/lib/storage";
 
 const VALID_STATUSES = ["pending", "reviewing", "approved", "rejected"];
 
@@ -21,6 +22,7 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
   const g = await gate();
   if (g) return g;
   const { id } = await params;
-  await prisma.writerApplication.delete({ where: { id } });
+  const deleted = await prisma.writerApplication.delete({ where: { id } });
+  if (deleted.scriptFileUrl) await deleteScriptFile(deleted.scriptFileUrl);
   return NextResponse.json({ ok: true });
 }

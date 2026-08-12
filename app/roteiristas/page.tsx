@@ -10,6 +10,8 @@ import {
   BadgeCheck,
   Users,
   Link2,
+  Paperclip,
+  X,
 } from "lucide-react";
 import { GENRES } from "@/lib/catalog";
 import { cn } from "@/lib/cn";
@@ -21,6 +23,9 @@ const EXPERIENCE_LEVELS = [
   { id: "profissional", label: "Profissional" },
 ];
 
+const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB
+const ACCEPTED_FILE_TYPES = ".pdf,.doc,.docx,.txt";
+
 export default function WritersLandingPage() {
   const [step, setStep] = useState<"form" | "success">("form");
   const [submitting, setSubmitting] = useState(false);
@@ -31,17 +36,21 @@ export default function WritersLandingPage() {
     phone: "",
     portfolioUrl: "",
     experience: "",
+    scriptGenre: "",
     genres: [] as string[],
     sample: "",
     motivation: "",
     availability: "",
     consent: false,
   });
+  const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState("");
 
   const valid =
     form.name.trim().length >= 2 &&
     /\S+@\S+\.\S+/.test(form.email) &&
     form.experience.length > 0 &&
+    form.scriptGenre.length > 0 &&
     form.sample.trim().length >= 60 &&
     form.consent;
 
@@ -52,16 +61,36 @@ export default function WritersLandingPage() {
     }));
   }
 
+  function pickFile(f: File | null) {
+    if (!f) return setFile(null);
+    if (f.size > MAX_FILE_SIZE) {
+      setFileError("Arquivo maior que 4MB");
+      return;
+    }
+    setFileError("");
+    setFile(f);
+  }
+
   async function submit() {
     if (!valid) return;
     setSubmitting(true);
     setError("");
     try {
-      const r = await fetch("/api/writers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, genres: form.genres.join(",") }),
-      });
+      const body = new FormData();
+      body.append("name", form.name);
+      body.append("email", form.email);
+      body.append("phone", form.phone);
+      body.append("portfolioUrl", form.portfolioUrl);
+      body.append("experience", form.experience);
+      body.append("scriptGenre", form.scriptGenre);
+      body.append("genres", form.genres.join(","));
+      body.append("sample", form.sample);
+      body.append("motivation", form.motivation);
+      body.append("availability", form.availability);
+      body.append("consent", String(form.consent));
+      if (file) body.append("script", file);
+
+      const r = await fetch("/api/writers", { method: "POST", body });
       if (!r.ok) throw new Error();
       setStep("success");
     } catch {
@@ -207,17 +236,17 @@ export default function WritersLandingPage() {
 
               <div>
                 <p className="text-xs text-white/65 mb-2 font-medium">
-                  Gêneros que você domina <span className="text-white/40">(opcional)</span>
+                  Gênero do roteiro/amostra <span className="text-[var(--color-vp-pink)]">*</span>
                 </p>
                 <div className="flex gap-2 flex-wrap">
                   {GENRES.map((g) => (
                     <button
                       key={g}
                       type="button"
-                      onClick={() => toggleGenre(g)}
+                      onClick={() => setForm((s) => ({ ...s, scriptGenre: g }))}
                       className={cn(
                         "px-3 py-1.5 rounded-full text-xs font-medium border transition",
-                        form.genres.includes(g)
+                        form.scriptGenre === g
                           ? "vp-gradient border-transparent"
                           : "border-white/15 text-white/65 hover:border-white/30"
                       )}
@@ -250,6 +279,62 @@ export default function WritersLandingPage() {
                     {form.sample.length} / 4000
                   </span>
                 </p>
+              </div>
+
+              <div>
+                <p className="text-xs text-white/65 mb-2 font-medium">
+                  Anexar roteiro completo <span className="text-white/40">(opcional, PDF/DOC/TXT, até 4MB)</span>
+                </p>
+                {file ? (
+                  <div className="flex items-center justify-between gap-3 bg-white/8 border border-white/10 rounded-xl px-3 py-2.5">
+                    <span className="flex items-center gap-2 text-sm text-white/85 min-w-0">
+                      <Paperclip className="w-4 h-4 shrink-0 text-white/45" />
+                      <span className="truncate">{file.name}</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setFile(null)}
+                      className="shrink-0 text-white/45 hover:text-white"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="flex items-center gap-2 bg-white/8 border border-dashed border-white/15 rounded-xl px-3 py-2.5 text-sm text-white/55 cursor-pointer hover:border-white/30">
+                    <Paperclip className="w-4 h-4 shrink-0" />
+                    Escolher arquivo
+                    <input
+                      type="file"
+                      accept={ACCEPTED_FILE_TYPES}
+                      className="hidden"
+                      onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
+                    />
+                  </label>
+                )}
+                {fileError && <p className="text-[10px] text-rose-300 mt-1">{fileError}</p>}
+              </div>
+
+              <div>
+                <p className="text-xs text-white/65 mb-2 font-medium">
+                  Outros gêneros que você domina <span className="text-white/40">(opcional)</span>
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  {GENRES.map((g) => (
+                    <button
+                      key={g}
+                      type="button"
+                      onClick={() => toggleGenre(g)}
+                      className={cn(
+                        "px-3 py-1.5 rounded-full text-xs font-medium border transition",
+                        form.genres.includes(g)
+                          ? "vp-gradient border-transparent"
+                          : "border-white/15 text-white/65 hover:border-white/30"
+                      )}
+                    >
+                      {g}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -302,7 +387,7 @@ export default function WritersLandingPage() {
               </button>
               {!valid && (
                 <p className="text-[10px] text-white/45 text-center -mt-2">
-                  Preencha nome, e-mail, experiência, amostra (60+ caracteres) e aceite os termos
+                  Preencha nome, e-mail, experiência, gênero, amostra (60+ caracteres) e aceite os termos
                 </p>
               )}
             </div>

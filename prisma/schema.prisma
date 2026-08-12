@@ -312,8 +312,11 @@ model WriterApplication {
   phone        String?
   portfolioUrl String?  // Wattpad, Instagram, site, PDF...
   experience   String   // "iniciante" | "amador" | "profissional"
-  genres       String   // CSV: bilionario,lobisomem,vinganca
+  scriptGenre  String   // gênero do roteiro anexado/amostra — obrigatório
+  genres       String   // CSV opcional: outros gêneros que domina
   sample       String   // trecho de roteiro/sinopse de amostra ou link
+  scriptFileUrl  String? // path no bucket privado Supabase Storage "roteiros"
+  scriptFileName String? // nome original do arquivo, pra exibir no admin
   motivation   String?  // por que quer escrever pro Vertiplay
   availability String?  // ex: "1 roteiro por semana"
   consent      Boolean  @default(false)

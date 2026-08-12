@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import type { WriterApplication } from "@prisma/client";
 import { PageHeader, Card, Badge, EmptyState } from "@/components/admin/ui";
 import { cn } from "@/lib/cn";
-import { Mail, Phone, Link2, Trash2 } from "lucide-react";
+import { Mail, Phone, Link2, FileDown, Trash2 } from "lucide-react";
 
 const STATUS_TABS: { id: string; label: string; tone: any }[] = [
   { id: "all", label: "Todas", tone: "default" },
@@ -106,10 +106,11 @@ export function WritersClient({
                       {w.status}
                     </Badge>
                     <Badge>{EXPERIENCE_LABEL[w.experience] ?? w.experience}</Badge>
+                    <Badge tone="info">{w.scriptGenre}</Badge>
                   </div>
                   <p className="text-xs text-white/55 mt-1">
                     {w.createdAt.toLocaleDateString("pt-BR")} {w.createdAt.toLocaleTimeString("pt-BR").slice(0, 5)}
-                    {w.genres && <> · {w.genres}</>}
+                    {w.genres && <> · também domina: {w.genres}</>}
                   </p>
                 </div>
                 <button onClick={() => del(w.id)} className="text-rose-300 text-xs flex items-center gap-1 shrink-0">
@@ -142,6 +143,11 @@ export function WritersClient({
                 {w.portfolioUrl && (
                   <a href={w.portfolioUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-white">
                     <Link2 className="w-3 h-3" /> Portfólio
+                  </a>
+                )}
+                {w.scriptFileUrl && (
+                  <a href={`/api/admin/writers/${w.id}/file`} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-emerald-300 hover:text-emerald-200">
+                    <FileDown className="w-3 h-3" /> {w.scriptFileName ?? "Baixar roteiro"}
                   </a>
                 )}
                 {!w.consent && <Badge tone="danger">SEM consentimento</Badge>}
