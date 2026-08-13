@@ -8,6 +8,8 @@ import Credentials from "next-auth/providers/credentials";
 import { OAuth2Client } from "google-auth-library";
 import { upsertUser, findUserByEmail } from "@/lib/social-store";
 import { verifyOtp } from "@/lib/email";
+import { verifyPassword } from "@/lib/password";
+import { prisma } from "@/lib/prisma";
 
 const googleClient = new OAuth2Client();
 
@@ -53,6 +55,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           console.error("[auth] google-native verifyIdToken failed:", (e as Error).message);
           return null;
         }
+      },
+    }),
+    // Login por senha — alternativa direta ao Google/OTP (ver /auth?mode=password)
+    Credentials({
+      id: "password",
+      name: "Senha",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Senha", type: "password" },
+      },
+      async authorize(credentials) {
+        const email = String(credentials?.email ?? "").trim().toLowerCase();
+        const password = String(credentials?.password ?? "");
+        if (!email || !password) return null;
+        const cred = await prisma.adminCredential.findUnique({ where: { email } });
+        if (!cred || !verifyPassword(password, cred.passwordHash)) return null;
+        const user = await upsertUser({ email, displayName: email.split("@")[0] });
+        return {
+          id: user.username,
+          email: user.email,
+          name: user.displayName,
+          image: user.avatarUrl,
+        };
       },
     }),
     // Login por email via código OTP

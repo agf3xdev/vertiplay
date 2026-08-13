@@ -3,7 +3,7 @@ import { signIn } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { Logo } from "@/components/Logo";
-import { Mail, ChevronLeft, Loader2 } from "lucide-react";
+import { Mail, ChevronLeft, Loader2, Lock } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { signInWithGoogleNative, isCapacitor } from "@/lib/native-auth";
 
@@ -21,9 +21,12 @@ function AuthInner() {
   const callbackUrl = sp.get("callbackUrl") || "/";
   const error = sp.get("error");
 
-  const [mode, setMode] = useState<"choose" | "email-input" | "email-code">("choose");
+  const [mode, setMode] = useState<"choose" | "email-input" | "email-code" | "password-input">(
+    sp.get("mode") === "password" ? "password-input" : "choose"
+  );
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -88,6 +91,24 @@ function AuthInner() {
     setLoading(false);
   }
 
+  async function loginWithPassword() {
+    setLoading(true);
+    setErr(null);
+    const r = await signIn("password", {
+      email,
+      password,
+      callbackUrl,
+      redirect: false,
+    });
+    if (r?.error) {
+      setErr("Email ou senha incorretos");
+      setLoading(false);
+      return;
+    }
+    if (r?.ok) router.push(callbackUrl);
+    setLoading(false);
+  }
+
   return (
     <div className="min-h-[100dvh] flex flex-col px-4 sm:px-6 pt-12 safe-top">
       {mode !== "choose" && (
@@ -122,6 +143,14 @@ function AuthInner() {
             <h1 className="text-2xl sm:text-3xl font-extrabold mt-6">Veja seu email</h1>
             <p className="text-white/65 text-sm mt-2">
               Enviamos um código de 6 dígitos pra <b className="text-white">{email}</b>
+            </p>
+          </>
+        )}
+        {mode === "password-input" && (
+          <>
+            <h1 className="text-2xl sm:text-3xl font-extrabold mt-6">Entrar com senha</h1>
+            <p className="text-white/65 text-sm mt-2">
+              Acesso direto com email e senha.
             </p>
           </>
         )}
@@ -218,6 +247,46 @@ function AuthInner() {
             className="mt-3 text-sm text-white/65 underline"
           >
             Reenviar código
+          </button>
+        </div>
+      )}
+
+      {/* ── Password ── */}
+      {mode === "password-input" && (
+        <div className="mt-8 flex flex-col">
+          <label className="text-xs text-white/65 mb-2 font-medium">Email</label>
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            autoFocus
+            autoComplete="email"
+            inputMode="email"
+            placeholder="voce@email.com"
+            className="bg-white/8 border border-white/10 rounded-2xl px-4 py-3.5 text-base placeholder:text-white/40 focus:outline-none focus:border-[var(--color-vp-pink)]"
+          />
+          <label className="text-xs text-white/65 mb-2 font-medium mt-4">Senha</label>
+          <input
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            type="password"
+            autoComplete="current-password"
+            placeholder="••••••••"
+            className="bg-white/8 border border-white/10 rounded-2xl px-4 py-3.5 text-base placeholder:text-white/40 focus:outline-none focus:border-[var(--color-vp-pink)]"
+          />
+          <button
+            onClick={loginWithPassword}
+            disabled={loading || !email || !password}
+            className={cn(
+              "mt-6 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2",
+              loading || !email || !password ? "bg-white/10 text-white/45" : "vp-gradient vp-glow"
+            )}
+          >
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : (
+              <>
+                <Lock className="w-4 h-4" /> Entrar
+              </>
+            )}
           </button>
         </div>
       )}

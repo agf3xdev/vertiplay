@@ -3,7 +3,7 @@
 
 import { auth } from "@/auth";
 
-const DEFAULT_ADMINS = ["agenciaf3xia@gmail.com", "livoolivecommerce@gmail.com"];
+const DEFAULT_ADMINS = ["agenciaf3xia@gmail.com", "livoolivecommerce@gmail.com", "vertiplayoficial@gmail.com"];
 
 export function adminEmails(): string[] {
   const csv = process.env.ADMIN_EMAILS ?? "";

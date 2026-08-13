@@ -66,6 +66,15 @@ model OtpCode {
   @@index([expiresAt])
 }
 
+// Login por senha — só pra admin, alternativa ao Google/OTP quando um dos
+// dois estiver indisponível. Hash scrypt (node:crypto, sem dependência nova).
+model AdminCredential {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
 // Ledger de eventos de pagamento (Stripe + Mercado Pago).
 model LedgerEntry {
   id         String   @id @default(cuid())
