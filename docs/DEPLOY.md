@@ -22,6 +22,7 @@ Configuradas via `vercel env add` (a maioria como *Sensitive* — write-only, n�
 | `NEXTAUTH_SECRET` | gerado na config original (mantido) |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID` | Google Cloud Console, projeto "Vertiplay" (mantido da config original) |
 | `STRIPE_WEBHOOK_SECRET`, `MP_WEBHOOK_SECRET`, `NEXT_PUBLIC_MP_PUBLIC_KEY` | mantidos da config original |
+| `RESEND_API_KEY` / `EMAIL_FROM` | reconfigurado em 2026-08-13, domínio `vertiplay.com.br` verificado no Resend (DKIM/SPF/MX/DMARC no Registro.br). Chave em `~/.vertiplay-resend.env` |
 | `STRIPE_SECRET_KEY` | **faltando** — pegar no dashboard Stripe e rodar `vercel env add STRIPE_SECRET_KEY production` |
 | `MERCADOPAGO_ACCESS_TOKEN` | **faltando** — pegar no dashboard Mercado Pago e rodar `vercel env add MERCADOPAGO_ACCESS_TOKEN production` |
 | `GOOGLE_IOS_CLIENT_ID` / `GOOGLE_ANDROID_CLIENT_ID` / `NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID` | **faltando** — só bloqueia login Google nativo no Capacitor, não o web |
