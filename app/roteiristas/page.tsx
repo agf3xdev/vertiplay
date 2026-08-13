@@ -89,11 +89,6 @@ const STEPS = [
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB
 
-// Esta página também é servida em roteiristas.vertiplay.com.br (subdomínio
-// dedicado, via middleware) — links "voltar" precisam do host absoluto do
-// app principal, não de "/" (que no subdomínio recai nesta mesma página).
-const MAIN_APP_URL = "https://mvp.vertiplay.com.br";
-
 export default function WritersLandingPage() {
   const [step, setStep] = useState<"form" | "success">("form");
   const [submitting, setSubmitting] = useState(false);
@@ -177,9 +172,7 @@ export default function WritersLandingPage() {
   return (
     <div className="min-h-[100dvh] bg-[var(--color-vp-bg)] text-white">
       <header className="max-w-5xl mx-auto px-6 py-5 flex items-center justify-between">
-        <a href={MAIN_APP_URL}>
-          <Logo size={26} />
-        </a>
+        <Logo size={26} />
         {open && (
           <a
             href="#form"
@@ -199,16 +192,10 @@ export default function WritersLandingPage() {
           <p className="text-white/70 mb-1">
             Nossa equipe vai avaliar sua sinopse e argumento.
           </p>
-          <p className="text-white/55 text-sm mb-10">
+          <p className="text-white/55 text-sm">
             Se o seu projeto for selecionado, ele poderá entrar em desenvolvimento e
             produção junto ao <b className="vp-gradient-text">Vertiplay</b>.
           </p>
-          <a
-            href={MAIN_APP_URL}
-            className="inline-block px-8 py-3.5 rounded-2xl vp-gradient vp-glow font-bold"
-          >
-            Conhecer o Vertiplay
-          </a>
         </div>
       ) : (
         <>
@@ -732,11 +719,8 @@ export default function WritersLandingPage() {
           </section>
 
           <footer className="border-t border-white/8 py-8">
-            <div className="max-w-5xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/40">
-              <span>© {new Date().getFullYear()} Vertiplay — produzido pela F3X</span>
-              <a href={MAIN_APP_URL} className="hover:text-white/70">
-                Voltar pro Vertiplay
-              </a>
+            <div className="max-w-5xl mx-auto px-6 text-center text-xs text-white/40">
+              © {new Date().getFullYear()} Vertiplay — produzido pela F3X
             </div>
           </footer>
         </>
