@@ -112,6 +112,55 @@ export async function sendFriendRequestEmail(opts: {
   }
 }
 
+// Notificação de nova história recebida na seleção /roteiristas
+const WRITERS_NOTIFICATION_EMAIL = "vertiplayoficial@gmail.com";
+
+export async function sendWriterApplicationEmail(opts: {
+  name: string;
+  artisticName?: string | null;
+  email: string;
+  phone: string;
+  cityState: string;
+  portfolioUrl?: string | null;
+  workTitle: string;
+  scriptGenre: string;
+  synopsis: string;
+  argumentUrl: string;
+  argumentFileName: string;
+}): Promise<void> {
+  try {
+    await resend().emails.send({
+      from: FROM_EMAIL,
+      to: WRITERS_NOTIFICATION_EMAIL,
+      replyTo: opts.email,
+      subject: `Nova história: "${opts.workTitle}" (${opts.scriptGenre})`,
+      html: renderWriterApplicationHtml(opts),
+      text: [
+        `Nova história recebida na seleção do Vertiplay.`,
+        ``,
+        `Título: ${opts.workTitle}`,
+        `Gênero: ${opts.scriptGenre}`,
+        `Autor(a): ${opts.name}${opts.artisticName ? ` (${opts.artisticName})` : ""}`,
+        `E-mail: ${opts.email}`,
+        `Telefone: ${opts.phone}`,
+        `Cidade/Estado: ${opts.cityState}`,
+        opts.portfolioUrl ? `Portfólio: ${opts.portfolioUrl}` : null,
+        ``,
+        `Sinopse:`,
+        opts.synopsis,
+        ``,
+        `Argumento (${opts.argumentFileName}): ${opts.argumentUrl}`,
+        `(link expira em 7 dias — o arquivo permanente fica em /admin/writers)`,
+      ]
+        .filter(Boolean)
+        .join("\n"),
+    });
+  } catch (e: any) {
+    console.error("[email] writer application notification failed:", e?.message);
+    // não bloqueia a inscrição se o email falhar — a candidatura já está salva no banco
+  }
+}
+
 // ─────────────── Templates HTML ───────────────
 
 function renderHtml(code: string): string {
@@ -147,6 +196,80 @@ function renderHtml(code: string): string {
         <tr><td style="padding-top:32px;border-top:1px solid rgba(255,255,255,0.08);margin-top:24px;color:#8e8a99;font-size:11px;text-align:center;padding:24px 0 0 0;">
           Vertiplay — Mini-novelas verticais no seu bolso.<br>
           Drama em 60 segundos.
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function renderWriterApplicationHtml(opts: {
+  name: string;
+  artisticName?: string | null;
+  email: string;
+  phone: string;
+  cityState: string;
+  portfolioUrl?: string | null;
+  workTitle: string;
+  scriptGenre: string;
+  synopsis: string;
+  argumentUrl: string;
+  argumentFileName: string;
+}): string {
+  const row = (label: string, value: string) =>
+    `<tr><td style="padding:4px 0;color:#8e8a99;font-size:12px;width:120px;vertical-align:top;">${label}</td><td style="padding:4px 0;color:#ffffff;font-size:13px;">${escapeHtml(value)}</td></tr>`;
+
+  return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"/><title>Nova história — Vertiplay</title></head>
+<body style="margin:0;padding:0;background:#0a0612;font-family:-apple-system,'Segoe UI',sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0612;padding:40px 0;">
+    <tr><td align="center">
+      <table width="100%" style="max-width:560px;background:#15091f;border-radius:24px;padding:32px;color:#ffffff;">
+        <tr><td style="padding-bottom:24px;">
+          <div style="display:inline-block;background:linear-gradient(135deg,#ff2e92,#7c3aed 60%,#2563eb);padding:12px 16px;border-radius:14px;">
+            <span style="color:white;font-weight:900;font-size:22px;letter-spacing:-1px;">Vertiplay</span>
+          </div>
+        </td></tr>
+        <tr><td style="padding-bottom:4px;">
+          <p style="margin:0;color:#8e8a99;font-size:12px;text-transform:uppercase;letter-spacing:1px;">Nova história recebida</p>
+        </td></tr>
+        <tr><td style="padding-bottom:16px;">
+          <h1 style="margin:0;font-size:22px;font-weight:800;">${escapeHtml(opts.workTitle)}</h1>
+          <span style="display:inline-block;margin-top:6px;background:rgba(255,46,146,0.15);color:#ff2e92;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;">${escapeHtml(opts.scriptGenre)}</span>
+        </td></tr>
+        <tr><td style="padding:16px 0;border-top:1px solid rgba(255,255,255,0.08);">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            ${row("Autor(a)", opts.artisticName ? `${opts.name} (${opts.artisticName})` : opts.name)}
+            ${row("E-mail", opts.email)}
+            ${row("Telefone", opts.phone)}
+            ${row("Cidade/Estado", opts.cityState)}
+            ${opts.portfolioUrl ? row("Portfólio", opts.portfolioUrl) : ""}
+          </table>
+        </td></tr>
+        <tr><td style="padding:16px 0;border-top:1px solid rgba(255,255,255,0.08);">
+          <p style="margin:0 0 6px 0;color:#8e8a99;font-size:12px;text-transform:uppercase;letter-spacing:1px;">Sinopse</p>
+          <p style="margin:0;color:#e5e2ea;font-size:13px;line-height:1.6;white-space:pre-line;">${escapeHtml(opts.synopsis)}</p>
+        </td></tr>
+        <tr><td align="center" style="padding:24px 0 8px 0;">
+          <a href="${opts.argumentUrl}"
+             style="display:inline-block;background:linear-gradient(135deg,#ff2e92,#7c3aed);color:white;text-decoration:none;font-weight:700;padding:14px 28px;border-radius:14px;font-size:15px;">
+            Baixar argumento (PDF)
+          </a>
+          <p style="margin:10px 0 0 0;color:#8e8a99;font-size:11px;">${escapeHtml(opts.argumentFileName)} · link expira em 7 dias</p>
+        </td></tr>
+        <tr><td style="padding-top:24px;border-top:1px solid rgba(255,255,255,0.08);color:#8e8a99;font-size:11px;text-align:center;">
+          Gerenciar todas as candidaturas em<br>
+          <a href="https://mvp.vertiplay.com.br/admin/writers" style="color:#ff2e92;">mvp.vertiplay.com.br/admin/writers</a>
         </td></tr>
       </table>
     </td></tr>

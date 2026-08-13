@@ -3,8 +3,9 @@
 
 import { prisma } from "@/lib/prisma";
 import { gate } from "@/lib/admin-api";
-import { uploadScriptFile } from "@/lib/storage";
+import { uploadScriptFile, signScriptFileUrl } from "@/lib/storage";
 import { isWritersSubmissionOpen } from "@/lib/writers-deadline";
+import { sendWriterApplicationEmail } from "@/lib/email";
 
 const VALID_GENRES = ["Drama", "Romance", "Comédia Romântica"];
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB
@@ -53,23 +54,44 @@ export async function POST(req: Request) {
   const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}/${safeName}`;
   await uploadScriptFile(path, file);
 
+  const artisticName = String(form.get("artisticName") ?? "").trim().slice(0, 120) || undefined;
+  const portfolioUrl = String(form.get("portfolioUrl") ?? "").trim().slice(0, 300) || undefined;
+  const argumentFileName = file.name.slice(0, 200);
+
   const item = await prisma.writerApplication.create({
     data: {
       name: name.slice(0, 120),
-      artisticName: String(form.get("artisticName") ?? "").trim().slice(0, 120) || undefined,
+      artisticName,
       email: email.slice(0, 200),
       phone: phone.slice(0, 50),
       cityState: cityState.slice(0, 120),
-      portfolioUrl: String(form.get("portfolioUrl") ?? "").trim().slice(0, 300) || undefined,
+      portfolioUrl,
       workTitle: workTitle.slice(0, 200),
       scriptGenre,
       synopsis: synopsis.slice(0, 4000),
       argumentFileUrl: path,
-      argumentFileName: file.name.slice(0, 200),
+      argumentFileName,
       consent,
       status: "pending",
     },
   });
+
+  const argumentUrl = await signScriptFileUrl(path, 7 * 24 * 60 * 60).catch(() => null);
+  if (argumentUrl) {
+    await sendWriterApplicationEmail({
+      name: item.name,
+      artisticName,
+      email: item.email,
+      phone: item.phone,
+      cityState: item.cityState,
+      portfolioUrl,
+      workTitle: item.workTitle,
+      scriptGenre: item.scriptGenre,
+      synopsis: item.synopsis,
+      argumentUrl,
+      argumentFileName,
+    });
+  }
 
   return Response.json({ ok: true, id: item.id });
 }
